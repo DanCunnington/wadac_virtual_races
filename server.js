@@ -1,9 +1,12 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const cors = require('cors')
 const strava = require('strava-v3')
+const path = require('path')
+const cfenv = require("cfenv");
+
 
 app.use(cors())
 
@@ -12,6 +15,8 @@ strava.config({
   "client_secret" : process.env.CLIENT_SECRET,
   "redirect_uri"  : "https://localhost:3000",
 });
+
+app.use('/', express.static(path.join(__dirname, 'ui')))
 
 app.get('/get_client_id', (req, res) => {
 	res.json({"client_id": process.env.CLIENT_ID})

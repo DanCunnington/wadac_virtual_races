@@ -1,0 +1,4 @@
+applications:
+- name: wadac-virtual-races
+  host: wadac-virtual-races
+  memory: 128M

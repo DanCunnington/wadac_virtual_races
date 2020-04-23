@@ -35,8 +35,8 @@ export default {
   data () {
     return {
       strava_client_id: null,
-      callback_url: 'http://localhost:8080',
-      server_url: 'http://localhost:3000',
+      callback_url: null,
+      server_url: null,
       cookie: {
         access_token: false
       },
@@ -50,6 +50,15 @@ export default {
   },
   methods: {
     initialise() {
+      // Dev or Prod
+      if (process.env.NODE_ENV == 'development') {
+        this.callback_url = 'http://localhost:8080'
+        this.server_url = 'http://localhost:3000'
+      } else if (process.env.NODE_ENV == 'production') {
+        this.callback_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
+        this.server_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
+      }
+
       // Get client ID
       this.$http.get(this.server_url+'/get_client_id').then(response => {
         this.strava_client_id = response.data.client_id
@@ -126,6 +135,7 @@ export default {
             "expires_at": response.data.expires_at
           }
           this.$cookie.set('wadac_virtual_races', JSON.stringify(cookie), 30)
+          this.cookie = cookie
           this.$router.push('/') 
         }
       })
