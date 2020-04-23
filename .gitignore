@@ -103,5 +103,26 @@ dist
 # TernJS port file
 .tern-port
 
-wadac-virtual-races-ui
 .DS_Store
+
+wadac-virtual-races-ui/.DS_Store
+wadac-virtual-races-ui/node_modules
+wadac-virtual-races-ui//dist
+
+wadac-virtual-races-ui/# local env files
+wadac-virtual-races-ui/.env.local
+wadac-virtual-races-ui/.env.*.local
+
+# Log files
+wadac-virtual-races-ui/npm-debug.log*
+wadac-virtual-races-ui/yarn-debug.log*
+wadac-virtual-races-ui/yarn-error.log*
+
+wadac-virtual-races-ui/# Editor directories and files
+wadac-virtual-races-ui/.idea
+wadac-virtual-races-ui/.vscode
+wadac-virtual-races-ui/*.suo
+wadac-virtual-races-ui/*.ntvs*
+wadac-virtual-races-ui/*.njsproj
+wadac-virtual-races-ui/*.sln
+wadac-virtual-races-ui/*.sw?
