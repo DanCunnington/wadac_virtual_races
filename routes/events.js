@@ -22,7 +22,7 @@ module.exports = (app, db) => {
 	})
 
 	app.get('/active_events', (req, res) => {
-		// Get all events from the database 
+		// Get active events from the database 
 		let current_time = Date.now()
 		let query = { "start_time": { $lte: current_time }, "end_time": { $gt: current_time }}
 		db.collection('events').find(query).toArray((err, result) => {
@@ -33,6 +33,17 @@ module.exports = (app, db) => {
 				res.json(result)
 			}
 		})
+	})
 
+	app.get('/all_events', (req, res) => {
+		// Get all events from the database 
+		db.collection('events').find({}).toArray((err, result) => {
+			if (err) {
+				res.status(500)
+				return res.json({"err": JSON.stringify(err)})
+			} else {
+				res.json(result)
+			}
+		})
 	})
 }
