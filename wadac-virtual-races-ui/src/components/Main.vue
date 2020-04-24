@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1>WADAC Virtual Racing Results Collector</h1>
+    <h1>WADAC Virtual Racing</h1>
     <p v-if="!cookie.access_token">Hi there. Please log in to Strava using the button below. You must grant "read" permissions for this app to work.</p>
     <img v-if="!cookie.access_token" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
     <p v-if="cookie.access_token">Hi, {{cookie.user_name}}!</p>
@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'Main',
   props: {
 
   },
@@ -78,9 +78,15 @@ export default {
         } else {
           // For callback, get access token
           let query_params = this.$route.query
-          if (query_params && Object.keys(query_params).indexOf('code') > -1) {
+          if (query_params && Object.keys(query_params).indexOf('code') > -1 &&
+            Object.keys(query_params).indexOf('scope') > -1) {
             let code = query_params.code
-            this.getAccessToken(code)
+            let scope = query_params.scope
+            if (!scope.includes('activity:read')) {
+              this.deauthorise()
+            } else {
+              this.getAccessToken(code)
+            }
           }
         }
       })
@@ -93,8 +99,13 @@ export default {
         return true
       }
     },
+    deauthorise() {
+      this.cookie = {access_token: false}
+      this.$cookie.delete('wadac_virtual_races');
+      this.$router.push('/')
+    },
     directToStrava() {
-      let url = `https://www.strava.com/oauth/authorize?client_id=${this.strava_client_id}&redirect_uri=${this.callback_url}&response_type=code`
+      let url = `https://www.strava.com/oauth/authorize?client_id=${this.strava_client_id}&redirect_uri=${this.callback_url}&response_type=code&scope=activity:read`
       window.location.href=url
     },
     refreshAccessToken(c) {

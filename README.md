@@ -4,9 +4,11 @@
 `npm install`
 
 .env file:  
-CLIENT_ID=   
-CLIENT_SECRET=  
-CLUB_ID=  
+STRAVA_CLIENT_ID=   
+STRAVA_CLIENT_SECRET=  
+MONGODB_USER=
+MONGODB_PASS=
+MONGODB_DB_NAME=
 
 # Run
 `node server.js`
