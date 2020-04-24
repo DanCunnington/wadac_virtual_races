@@ -1,6 +1,6 @@
 module.exports = (app, db, strava) => {
 	app.get('/get_client_id', (req, res) => {
-		res.json({"client_id": process.env.CLIENT_ID})
+		res.json({"client_id": process.env.STRAVA_CLIENT_ID})
 	})
 
 	app.get('/get_access_token', (req, res) => {
