@@ -3,34 +3,26 @@
     <h1>WADAC Virtual Racing</h1>
     <p v-if="!cookie.access_token">Hi there. Please log in to Strava using the button below. You must grant "read" permissions for this app to work.</p>
     <img v-if="!cookie.access_token" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
-    <p v-if="cookie.access_token">Hi, {{cookie.user_name}}!</p>
-    <b-form inline @submit.prevent="getResults" v-if="cookie.access_token" class="justify-content-center">
-      <b-form-group
-        id="input-group-1"
-        label="Strava Activity Name: "
-        class="mr-sm-2"
-        label-for="input-1"
-      >
-        <b-form-input
-          id="input-1"
-          v-model="event_name"
-          size="sm"
-          type="text"
-          required
-        ></b-form-input>
-      </b-form-group>
-      <b-button type="submit" variant="primary" :disabled="isSubmitted">Get Results</b-button>
-    </b-form>
+    <div v-if="cookie.access_token">
+      <p>Hi, {{cookie.user_name}}!</p>
 
-    
+      <div class="content">
+        <SubmitResult :cookie="cookie" :server_url="server_url"></SubmitResult>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import SubmitResult from './SubmitResult.vue'
+
 export default {
   name: 'Main',
   props: {
 
+  },
+  components: {
+    SubmitResult
   },
   data () {
     return {
@@ -70,7 +62,6 @@ export default {
             this.cookie = cookie
             console.log('exists')
           } else {
-            console.log(cookie.refresh_token)
             this.refreshAccessToken(cookie).then(_ => {
               console.log('refreshed')
             })
@@ -150,61 +141,6 @@ export default {
           this.$router.push('/') 
         }
       })
-    },
-    getResultsRequest() {
-      this.$http
-      .get(this.server_url+'/get_results?access_token='+this.cookie.access_token+'&event_name='+this.event_name)
-      .then(response => {
-        if (Object.keys(response).indexOf('err') > -1) {
-          console.log(response.err)
-        } else {
-          console.log(response.data)
-          this.results = response.data.results
-          let headers = response.data.headers
-
-          // Download the results as csv
-          let tmp_csv = [headers]
-          this.results.forEach(r => {
-            tmp_csv.push([r['athlete_name'], r['activity_name'], r['distance_miles'], r['moving_time'], r['elev_gain']])
-          })
-          console.log(tmp_csv)
-          let csvContent = tmp_csv.map(e => e.join(",")).join("\n");
-          var download = function(content, fileName, mimeType) {
-            var a = document.createElement('a');
-            mimeType = mimeType || 'application/octet-stream';
-            if (navigator.msSaveBlob) { // IE10
-              navigator.msSaveBlob(new Blob([content], {
-                type: mimeType
-              }), fileName);
-            } else if (URL && 'download' in a) { //html5 A[download]
-              a.href = URL.createObjectURL(new Blob([content], {
-                type: mimeType
-              }));
-              a.setAttribute('download', fileName);
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-            } else {
-              location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
-            }
-          }
-          download(csvContent, this.event_name+'.csv', 'text/csv;encoding:utf-8');
-          this.isSubmitted = false
-        }
-      })
-    },
-    getResults() {
-      this.isSubmitted = true
-      this.results = []
-
-      // Check cookie is ok
-      if (this.cookieExpired(this.cookie)) {
-        this.refreshAccessToken(this.cookie).then(_ => {
-          this.getResultsRequest()
-        })
-      } else {
-        this.getResultsRequest()
-      } 
     }
   }
 }
@@ -235,6 +171,12 @@ input {
 button:disabled {
   cursor: not-allowed;
   pointer-events: all !important;
+}
+
+.content {
+  margin-top: 40px;
+  margin: 0 auto;
+  max-width: 500px;
 }
 
 </style>
