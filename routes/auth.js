@@ -1,4 +1,4 @@
-module.exports = (app, db, strava) => {
+module.exports = (app, db, strava, auth_creds) => {
 	app.get('/get_client_id', (req, res) => {
 		res.json({"client_id": process.env.STRAVA_CLIENT_ID})
 	})
@@ -26,5 +26,14 @@ module.exports = (app, db, strava) => {
 			refresh_token = body.refresh_token
 			res.json({access_token, refresh_token, expires_at})
 		})
+	})
+
+	app.post('/is_admin', (req, res) => {
+		let pass = req.body.password
+		if (pass == process.env.ADMIN_PASS) {
+			res.json({"logged_in": true})
+		} else {
+			res.json({"logged_in": false})	
+		}
 	})
 }
