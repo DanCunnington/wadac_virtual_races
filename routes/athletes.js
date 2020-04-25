@@ -11,6 +11,7 @@ module.exports = (app, db, strava) => {
 		let params = {"access_token": access_token, "per_page": 10}
 		strava.athlete.listActivities(params, (err, result) => {
 			if (err) {
+				console.log(err)
 				res.status(500)
 				return res.json({"err": JSON.stringify(err)})
 			}

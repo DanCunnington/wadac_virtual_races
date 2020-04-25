@@ -179,4 +179,8 @@ button:disabled {
   max-width: 500px;
 }
 
+h1.hover-cursor {
+  cursor: pointer
+}
+
 </style>
