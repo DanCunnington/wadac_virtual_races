@@ -37,7 +37,11 @@ export default {
       zoom: 13,
       center: latLng(47.41322, -1.219482),
       mapOptions: {
-        zoomSnap: 0.5
+        zoomSnap: 0.5,
+        zoomControl: false,
+        scrollWheelZoom: false,
+        zoomDelta: 0,
+        dragging: false
       },
       attribution:'',
       map: null,
