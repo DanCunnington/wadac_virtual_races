@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <h1>WADAC Virtual Racing</h1>
-    <p v-if="!cookie.access_token">Hi there. Please log in to Strava using the button below. You must grant "read" permissions for this app to work.</p>
+    <p v-if="!cookie.access_token">Hi there. Please log in to Strava using the button below. This application requires access to your activities in order to submit a result.</p>
     <img v-if="!cookie.access_token" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
     <div v-if="cookie.access_token">
       <p>Hi, {{cookie.user_name}}!</p>
