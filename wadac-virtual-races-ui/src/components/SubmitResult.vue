@@ -104,8 +104,8 @@ export default {
         "athlete_name": this.cookie.user_name,
         "elapsed_time": selected_acc.elapsed_time,
         "moving_time": selected_acc.moving_time,
-        "elevation_gain": selected_acc.total_elevation_gain,
-        "distance": selected_acc.distance
+        "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281),
+        "distance": (selected_acc.distance / 1609).toFixed(2)
       }
       this.$http.post(this.server_url+'/submit_result', new_result).then(response => {
         if (Object.keys(response).indexOf('err') > -1) {
