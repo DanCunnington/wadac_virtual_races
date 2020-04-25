@@ -10,7 +10,14 @@ const bodyParser = require('body-parser')
 const MongoClient = require('mongodb').MongoClient;
 
 // Connect to Mongo and terminate if failed.
-const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@dan-mrvd9.mongodb.net/${process.env.MONGODB_DB_NAME}?retryWrites=true&w=majority`
+let db_name = ''
+if (process.env.NODE_ENV == 'production') {
+	db_name = process.env.MONGODB_DB_NAME_PROD
+} else {
+	db_name = process.env.MONGODB_DB_NAME_DEV
+
+}
+const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@dan-mrvd9.mongodb.net/${db_name}?retryWrites=true&w=majority`
 const mongo_client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 mongo_client.connect(err => {
 	if (err) {
@@ -19,7 +26,7 @@ mongo_client.connect(err => {
 		process.exit(0)
 	} 
 	console.log('Connected to mongodb.')
-	const db = mongo_client.db(process.env.MONGODB_DB_NAME);
+	const db = mongo_client.db(db_name);
 
 	// Setup app
 	app.use(cors())
