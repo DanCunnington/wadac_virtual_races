@@ -10,11 +10,17 @@ module.exports = (app, db, strava, auth_creds) => {
 				res.status(401)
 				return res.json({"err": err})
 			}
-			access_token = body.access_token
-			expires_at = body.expires_at
-			refresh_token = body.refresh_token
-			user_name = body.athlete.firstname + ' ' + body.athlete.lastname
-			res.json({access_token, refresh_token, expires_at, user_name})
+			if (body.access_token && body.expires_at && body.refresh_token && 
+				body.athlete && body.athlete.firstname && body.athlete.lastname) {
+				access_token = body.access_token
+				expires_at = body.expires_at
+				refresh_token = body.refresh_token
+				user_name = body.athlete.firstname + ' ' + body.athlete.lastname
+				return res.json({access_token, refresh_token, expires_at, user_name})
+			} else {
+				res.status(500)
+				return res.json({"err": err})
+			}
 		})
 	})
 

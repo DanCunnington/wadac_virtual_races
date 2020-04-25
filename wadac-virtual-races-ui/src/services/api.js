@@ -21,7 +21,15 @@ export default {
 	},
 
 	getAccessToken(code) {
-		return Vue.prototype.$http.get(server_url+'/get_access_token?code='+code)
+		return new Promise((resolve, reject) => {
+			// If access token is invalid, deauthorise
+			Vue.prototype.$http.get(server_url+'/get_access_token?code='+code).then(response => {
+				return resolve(response)
+			}, err => {
+				console.log(err)
+				this.clearCookie()
+			})
+		})
 	},
 
 	getActiveEvents() {
