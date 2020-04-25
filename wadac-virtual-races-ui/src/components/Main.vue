@@ -7,7 +7,7 @@
       <p>Hi, {{cookie.user_name}}!</p>
 
       <div class="content">
-        <SubmitResult :cookie="cookie" :server_url="server_url"></SubmitResult>
+        <SubmitResult :cookie="cookie"></SubmitResult>
       </div>
     </div>
   </div>
@@ -15,6 +15,7 @@
 
 <script>
 import SubmitResult from './SubmitResult.vue'
+import API from '../services/api.js'
 
 export default {
   name: 'Main',
@@ -28,7 +29,6 @@ export default {
     return {
       strava_client_id: null,
       callback_url: null,
-      server_url: null,
       cookie: {
         access_token: false
       },
@@ -45,14 +45,12 @@ export default {
       // Dev or Prod
       if (process.env.NODE_ENV == 'development') {
         this.callback_url = 'http://localhost:8080'
-        this.server_url = 'http://localhost:3000'
       } else if (process.env.NODE_ENV == 'production') {
         this.callback_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
-        this.server_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
       }
 
       // Get client ID
-      this.$http.get(this.server_url+'/get_client_id').then(response => {
+      API.getClientID().then(response => {
         this.strava_client_id = response.data.client_id
         
         // Check if access token cookie exists
@@ -93,7 +91,7 @@ export default {
     deauthorise() {
       this.cookie = {access_token: false}
       this.$cookie.delete('wadac_virtual_races');
-      this.$router.push('/')
+      this.$router.go()
     },
     directToStrava() {
       let url = `https://www.strava.com/oauth/authorize?client_id=${this.strava_client_id}&redirect_uri=${this.callback_url}&response_type=code&scope=activity:read`
@@ -103,9 +101,7 @@ export default {
       return new Promise((resolve, reject) => {
         let refresh_token = c.refresh_token
         let user_name = c.user_name
-        this.$http
-        .get(this.server_url+'/refresh_access_token?refresh_token='+refresh_token)
-        .then(response => {
+        API.refreshAccessToken(refresh_token).then(response => {
           if (Object.keys(response).indexOf('err') > -1) {
             console.log(response.err)
             reject()
@@ -124,9 +120,7 @@ export default {
       })
     },
     getAccessToken(code) {
-      this.$http
-      .get(this.server_url+'/get_access_token?code='+code)
-      .then(response => {
+      API.getAccessToken(code).then(response => {
         if (Object.keys(response).indexOf('err') > -1) {
           console.log(response.err)
         } else {

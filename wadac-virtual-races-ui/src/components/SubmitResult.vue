@@ -43,9 +43,10 @@
 
 <script>
 import ActivityPreview from './ActivityPreview.vue'
+import API from '../services/api.js'
 export default {
   name: 'SubmitResult',
-  props: ['cookie', 'server_url'],
+  props: ['cookie'],
   components: {
     ActivityPreview
   },
@@ -72,7 +73,7 @@ export default {
       this.getAthleteActivities()
     },
     getActiveEvents() {
-      this.$http.get(this.server_url+'/active_events').then(response => {
+      API.getActiveEvents().then(response => {
         if (Object.keys(response).indexOf('err') > -1) {
           console.log(response.err)
         } else {
@@ -84,7 +85,7 @@ export default {
       })
     },
     getAthleteActivities() {
-      this.$http.get(this.server_url+'/athlete_activities?access_token='+this.cookie.access_token).then(response => {
+      API.getAthleteActivities(this.cookie.access_token).then(response => {
         if (Object.keys(response).indexOf('err') > -1) {
           console.log(response.err)
         } else {
@@ -107,7 +108,7 @@ export default {
         "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281),
         "distance": (selected_acc.distance / 1609).toFixed(2)
       }
-      this.$http.post(this.server_url+'/submit_result', new_result).then(response => {
+      API.submitResult(new_result).then(response => {
         if (Object.keys(response).indexOf('err') > -1) {
           console.log(response.err)
         } else {

@@ -20,7 +20,6 @@
      <div v-if="logged_in">
         <p class="notification">{{notification}}</p>
         <div class="row">
-
             <div class="col-sm-6">
                 <h2>Create Event</h2>
                 <form @submit.prevent="createEvent" class="ev-form" >
@@ -48,7 +47,6 @@
                       </div>
                     </div>
                  </form>
-
             </div>
             <div class="col-sm-6">
                 <h2>Get Results</h2>
@@ -72,6 +70,8 @@
   </div>
 </template>
 <script>
+import API from '../services/api.js'
+
 export default {
   name: 'Admin',
   props: [],
@@ -82,7 +82,6 @@ export default {
     return {
       logged_in: false,
       password: '',
-      server_url: '',
       ev_name: '',
       ev_start_date: null,
       ev_end_date: null,
@@ -111,17 +110,10 @@ export default {
   },
   methods: {
     initialise() {
-      // Dev or Prod
-      if (process.env.NODE_ENV == 'development') {
-        this.server_url = 'http://localhost:3000'
-      } else if (process.env.NODE_ENV == 'production') {
-        this.server_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
-      }
-
       this.getEvents()
     },
     login() {
-        this.$http.post(this.server_url+'/is_admin', {"password": this.password}).then(response => {
+        API.isAdmin({"password": this.password}).then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
               console.log(response.err)
             } else {
@@ -130,7 +122,7 @@ export default {
         })
     },
     getEvents() {
-        this.$http.get(this.server_url+'/all_events').then(response => {
+        API.getAllEvents().then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
                 console.log(response.err)
             } else {
@@ -169,7 +161,7 @@ export default {
         this.ev_name = ''
         this.ev_start_date = ''
         this.ev_end_date = ''
-        this.$http.post(this.server_url+'/new_event', new_event).then(response => {
+        API.newEvent(new_event).then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
                 console.log(response.err)
             } else {
@@ -182,12 +174,12 @@ export default {
     },
     downloadResults() {
         let evt = this.full_events[this.selected_event]
-        this.$http.get(this.server_url+'/event_results?event_id='+evt._id).then(response => {
+        API.eventResults(evt._id).then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
                 console.log(response.err)
             } else {
                 console.log(response.data)
-                let headers = ['athlete_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+                let headers = ['athlete_name', 'distance_meters', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
                 
                 // Download the results as csv
                 let tmp_csv = [headers]
