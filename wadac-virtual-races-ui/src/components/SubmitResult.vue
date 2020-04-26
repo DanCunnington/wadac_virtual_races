@@ -54,7 +54,7 @@ export default {
     return {
       selected_event: null,
       selected_activity: null,
-      events: [],
+      events: [{ value: null, text: 'Please select an event' }],
       activities: [],
       full_activities: [],
       full_events: [],
