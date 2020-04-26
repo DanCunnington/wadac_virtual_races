@@ -86,7 +86,7 @@ export default {
       ev_start_date: null,
       ev_end_date: null,
       notification: '',
-      events: [],
+      events: [{ value: null, text: 'Please select an event' }],
       full_events: [],
       selected_event: null,
       start_state: null,
@@ -179,12 +179,16 @@ export default {
                 console.log(response.err)
             } else {
                 console.log(response.data)
-                let headers = ['athlete_name', 'distance_meters', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+                let headers = ['athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
                 
                 // Download the results as csv
                 let tmp_csv = [headers]
                 response.data.forEach(r => {
-                    tmp_csv.push([r['athlete_name'], r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+                    let activity_name = ''
+                    if (Object.keys(r).indexOf('activity_name') > -1) {
+                        activity_name = r['activity_name']
+                    }
+                    tmp_csv.push([r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
                 })
                 console.log(tmp_csv)
                 let csvContent = tmp_csv.map(e => e.join(",")).join("\n");

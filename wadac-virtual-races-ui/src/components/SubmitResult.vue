@@ -103,6 +103,7 @@ export default {
       let new_result = {
         "event_id": selected_event._id,
         "athlete_name": this.cookie.user_name,
+        "activity_name": selected_acc.name,
         "elapsed_time": selected_acc.elapsed_time,
         "moving_time": selected_acc.moving_time,
         "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281),

@@ -4,20 +4,21 @@ module.exports = (app, db) => {
 	app.post('/submit_result', (req, res) => {
 		let event_id = req.body.event_id
 		let athlete_name = req.body.athlete_name
+		let activity_name = req.body.activity_name
 		let elapsed_time = req.body.elapsed_time
 		let moving_time = req.body.moving_time
 		let elevation_gain = req.body.elevation_gain
 		let distance = req.body.distance
 
-		if (!event_id || !athlete_name || !elapsed_time || !moving_time
+		if (!event_id || !activity_name || !athlete_name || !elapsed_time || !moving_time
 			|| ! elevation_gain || !distance) {
 			res.status(400)
 			return res.json({"err": "please specify event_id, athlete_name, "+
-				"elapsed_time, moving_time, elevation_gain and distance"})
+				"activity_name, elapsed_time, moving_time, elevation_gain and distance"})
 		}
 
 		// Insert to database
-		let result = {event_id, athlete_name, elapsed_time, 
+		let result = {event_id, athlete_name, activity_name, elapsed_time, 
 			moving_time, elevation_gain, distance}
 		db.collection('results').insertOne(result, (err, mongo_result) => {
 			if (err) {
