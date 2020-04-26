@@ -10,27 +10,45 @@
             <input type="text" class="form-control" id="athlete-name" v-model="cookie.user_name" :disabled=true>
           </div>
         </div>
-        <div class="form-group row">
-          <label for="event" class="col-sm-3 col-form-label">Event</label>
-          <div class="col-sm-9">
-            <b-form-select v-model="selected_event" :options="events" required></b-form-select>
-          </div>
-        </div>
-        <fieldset class="form-group" v-if="full_activities.length > 0">
-          <div class="row">
-            <legend class="col-form-label col-sm-3 pt-0">Activity</legend>
-            <div class="col-sm-9 activity-container">
-              <div class="form-check" v-for="(activity, idx) in full_activities">
-                <input class="form-check-input position-static" type="radio" name="activity-radio" v-model="selected_activity" :id="activity.id" :value="idx" required>
-                <ActivityPreview :activity="activity"></ActivityPreview>
-              </div>
+        <div v-if="!loading">
+          <div class="form-group row">
+            <label for="event" class="col-sm-3 col-form-label">Event</label>
+            <div class="col-sm-9">
+              <b-form-select v-model="selected_event" :options="events" required></b-form-select>
             </div>
           </div>
-        </fieldset>
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <button type="submit" class="btn btn-primary float-right">Submit</button>
+          <div class="form-group row" v-if="selected_event != null">
+            <label for="event" class="col-sm-3 col-form-label">Event Dates</label>
+            <div class="col-sm-9 event_dates">
+              <p class="event_dates">{{event_date_str}}</p>
+            </div>
           </div>
+          <div v-if="selected_event != null">
+            <div v-if="full_activities.length > 0">
+              <fieldset class="form-group">
+                <div class="row">
+                  <legend class="col-form-label col-sm-3 pt-0">Activity</legend>
+                  <div class="col-sm-9 activity-container">
+                    <div class="form-check" v-for="(activity, idx) in full_activities">
+                      <input class="form-check-input position-static" type="radio" name="activity-radio" v-model="selected_activity" :id="activity.id" :value="idx" required>
+                      <ActivityPreview :activity="activity"></ActivityPreview>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+            <div v-else>
+              <p>No activities within the event date range to submit.</p>
+            </div>
+          </div>
+          <div class="form-group row" v-if="selected_event != null">
+            <div class="col-sm-12">
+              <button type="submit" class="btn btn-primary float-right">Submit</button>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <p>Loading...</p>
         </div>
       </form>
     </div>
@@ -57,45 +75,93 @@ export default {
       events: [{ value: null, text: 'Please select an event' }],
       activities: [],
       full_activities: [],
+      backup_activities: [],
       full_events: [],
-      submitted: false
+      submitted: false,
+      event_date_str: '',
+      loading: true
     }
   },
   mounted() {
     this.initialise()
   },
+  watch: {
+    selected_event: function() {
+      let e = this.full_events[this.selected_event]
+      console.log(e)
+      let start = new Date(e.start_time)
+      let end = new Date(e.end_time)
+      this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
+      this.filterActivities(e)      
+    }
+  },
   methods: {
     initialise() {
       // Get active events
-      this.getActiveEvents()
-
-      // Get activities
-      this.getAthleteActivities()
+      this.getActiveEvents().then(_ => {
+        // Get activities
+        this.getAthleteActivities().then(_ => {
+          this.loading = false
+        })
+      })
     },
     getActiveEvents() {
-      API.getActiveEvents().then(response => {
-        if (Object.keys(response).indexOf('err') > -1) {
-          console.log(response.err)
-        } else {
-          this.full_events = response.data
-          response.data.forEach((ev, idx) => {
-            this.events.push({"value": idx, "text": ev.event_name})
-          })
-        }
+      return new Promise((resolve, reject) => {
+        API.getActiveEvents().then(response => {
+          if (Object.keys(response).indexOf('err') > -1) {
+            console.log(response.err)
+            reject()
+          } else {
+            this.full_events = response.data
+            response.data.forEach((ev, idx) => {
+              this.events.push({"value": idx, "text": ev.event_name})
+            })
+            resolve()
+          }
+        })
       })
     },
     getAthleteActivities() {
-      API.getAthleteActivities(this.cookie.access_token).then(response => {
-        if (Object.keys(response).indexOf('err') > -1) {
-          console.log(response.err)
-        } else {
-          this.full_activities = response.data
-          response.data.forEach((ac, idx) => {
-            let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
-            this.activities.push({"value": idx, "html": html_str})
-          })
+      return new Promise((resolve, reject) => {
+        API.getAthleteActivities(this.cookie.access_token).then(response => {
+          if (Object.keys(response).indexOf('err') > -1) {
+            console.log(response.err)
+            reject()
+          } else {
+            console.log(response.data)
+            this.full_activities = response.data
+            this.backup_activities = response.data
+            response.data.forEach((ac, idx) => {
+              let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
+              this.activities.push({"value": idx, "html": html_str})
+            })
+            resolve()
+          }
+        })
+      })
+    },
+    filterActivities(event) {
+      let start_time = event.start_time
+      let end_time = event.end_time
+
+      let new_activities = []
+      let new_full_activities = []
+      this.backup_activities.forEach((ac, idx) => {
+        let date_split = ac.start_date_local.split('T')
+        let date = date_split[0].split('-')
+        let time = date_split[1].split('Z')[0]
+        let time_split = time.split(':')
+        let date_obj = new Date(date[0], parseInt(date[1])-1, date[2], time_split[0], time_split[1], time_split[2])
+        let activity_js_time = date_obj.getTime()
+        if (activity_js_time >= start_time && activity_js_time < end_time) {
+          new_full_activities.push(ac)
+          let idx = new_full_activities.length -1
+          let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
+          new_activities.push({"value": idx, "html": html_str})
         }
       })
+      this.activities = new_activities
+      this.full_activities = new_full_activities
     },
     submitResult() {
       let selected_acc = this.full_activities[this.selected_activity]
@@ -139,6 +205,14 @@ export default {
   .activity-container {
     height: 400px;
     overflow-y: scroll;
+  }
+
+  .event_dates {
+    line-height: 40px;
+  }
+
+  p.event_dates {
+    margin-bottom: 0px;
   }
 
 </style>

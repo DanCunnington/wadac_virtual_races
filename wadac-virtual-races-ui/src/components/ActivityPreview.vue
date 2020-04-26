@@ -1,6 +1,7 @@
 <template>
   <div class="activity">
-    <h4>{{activity.name}}</h4>
+    <h4 class="activity_name">{{activity.name}}</h4>
+    <p class="date">{{date_str}}</p>
     <ul class="list-stats">
       <li class="stat">
         <div class="stat-subtext">Distance</div>
@@ -48,8 +49,8 @@ export default {
       strava_map_url: 'https://b.tiles.mapbox.com/v4/strava.blprdx6r/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1Ijoic3RyYXZhIiwiYSI6IlpoeXU2U0UifQ.c7yhlZevNRFCqHYm6G6Cyg',
       distance_miles: 0,
       elevation_gain: 0,
-      time_str: ''
-
+      time_str: '',
+      date_str: ''
     }
   },
   mounted() {
@@ -77,8 +78,14 @@ export default {
       } else {
         this.time_str = parseInt(seconds / 60) +' min'
       }
+      let date_split = this.activity.start_date_local.split('T')
+      let date = date_split[0].split('-')
+      let time = date_split[1].split('Z')[0]
+      let time_split = time.split(':')
+      let date_obj = new Date(date[0], parseInt(date[1])-1, date[2], time_split[0], time_split[1], time_split[2])
+      let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday' , 'Saturday']
+      this.date_str = days[date_obj.getDay()] +' ' + date[2] + '/' + date[1] + '/' + date[0] +' ' + time_split[0] +':'+time_split[1]
     }
-    
   }
 }
 </script>
@@ -135,6 +142,14 @@ export default {
     line-height: 1;
     white-space: nowrap;
     -webkit-font-smoothing: antialiased;
+  }
+
+  p.date {
+    font-size: smaller;
+  }
+
+  h4.activity_name {
+    margin-bottom: 0px;
   }
 
 </style>
