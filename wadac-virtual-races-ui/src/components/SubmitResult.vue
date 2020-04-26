@@ -88,7 +88,6 @@ export default {
   watch: {
     selected_event: function() {
       let e = this.full_events[this.selected_event]
-      console.log(e)
       let start = new Date(e.start_time)
       let end = new Date(e.end_time)
       this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
@@ -127,14 +126,19 @@ export default {
           if (Object.keys(response).indexOf('err') > -1) {
             console.log(response.err)
             reject()
-          } else {
-            console.log(response.data)
-            this.full_activities = response.data
-            this.backup_activities = response.data
+          } else {            
+            let full_activities = []
+            let backup_activities = []
             response.data.forEach((ac, idx) => {
-              let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
-              this.activities.push({"value": idx, "html": html_str})
+              if (ac.type == 'Run') {
+                full_activities.push(ac)
+                backup_activities.push(ac)
+                let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
+                this.activities.push({"value": idx, "html": html_str})
+              }
             })
+            this.full_activities = full_activities
+            this.backup_activities = backup_activities
             resolve()
           }
         })
@@ -203,7 +207,7 @@ export default {
   }
 
   .activity-container {
-    height: 400px;
+    max-height: 400px;
     overflow-y: scroll;
   }
 
