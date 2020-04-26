@@ -151,7 +151,7 @@ export default {
         let picked_start = this.ev_start_date.split('-')
         let picked_end = this.ev_end_date.split('-')
         let start_date = new Date(parseInt(picked_start[0]), parseInt(picked_start[1])-1, parseInt(picked_start[2])).getTime()
-        let end_date = new Date(parseInt(picked_end[0]), parseInt(picked_end[1])-1, parseInt(picked_end[2])).getTime()
+        let end_date = new Date(parseInt(picked_end[0]), parseInt(picked_end[1])-1, parseInt(picked_end[2]), 23, 59, 59).getTime()
 
         let new_event = {
             "name": this.ev_name,
