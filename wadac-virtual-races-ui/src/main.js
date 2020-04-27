@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
-import { BootstrapVue } from 'bootstrap-vue'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import { LMap, LTileLayer, LMarker, LPolyline } from 'vue2-leaflet';
 
 import 'bootstrap/dist/css/bootstrap.css'
@@ -22,6 +22,7 @@ var VueCookie = require('vue-cookie');
 // Tell Vue to use the plugin
 Vue.use(VueCookie);
 Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 Vue.prototype.$http = axios
 
 new Vue({

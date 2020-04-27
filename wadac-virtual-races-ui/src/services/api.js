@@ -64,6 +64,11 @@ export default {
 		return Vue.prototype.$http.post(server_url+'/new_event', evt)
 	},
 
+	editEvent(evt_id, evt) {
+		evt._id = evt_id
+		return Vue.prototype.$http.post(server_url+'/edit_event', evt)
+	},
+
 	eventResults(evt_id) {
 		return Vue.prototype.$http.get(server_url+'/event_results?event_id='+evt_id)
 	},

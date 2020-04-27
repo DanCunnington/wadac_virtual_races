@@ -1,3 +1,4 @@
+const ObjectID = require('mongodb').ObjectID;
 module.exports = (app, db) => {
 	app.post('/new_event', (req, res) => {
 		let event_name = req.body.name
@@ -12,6 +13,31 @@ module.exports = (app, db) => {
 		// Insert to database
 		let event = {event_name, start_time, end_time}
 		db.collection('events').insertOne(event, (err, result) => {
+			if (err) {
+				res.status(500)
+				return res.json({"err": JSON.stringify(err)})
+			} else {
+				res.sendStatus(200)
+			}
+		})
+	})
+
+	app.post('/edit_event', (req, res) => {
+		let event_name = req.body.name
+		let start_time = req.body.start_time
+		let end_time = req.body.end_time
+		let _id = req.body._id
+
+		if (!_id || !event_name || !start_time || !end_time || end_time <= start_time) {
+			res.status(400)
+			return res.json({"err": "please specify id, event_name, start_time and end_time and ensure end_time is after start_time."})
+		}
+
+		// Insert to database
+		let event = {event_name, start_time, end_time}
+		let query = {"_id": ObjectID(_id)}
+		let update = {"$set": event}
+		db.collection('events').updateOne(query, update, (err, result) => {
 			if (err) {
 				res.status(500)
 				return res.json({"err": JSON.stringify(err)})
