@@ -38,8 +38,8 @@
           </template>
         </b-modal>
 
-
-        <b-modal id="results-modal" size="lg" :title="modal_results_title">
+        
+        <b-modal id="results-modal" class="results-modal" size="xl" :title="modal_results_title">
           <ResultsModal ref="results_modal" :preview_results_set="preview_results_set"></ResultsModal>
           <template v-slot:modal-footer="{ hide }">
             <b-button variant="outline-secondary" @click="hide()">
@@ -48,7 +48,6 @@
           </template>
           
         </b-modal>
-
       </div>
       <b-table v-if="events.length > 0" striped hover sticky-header 
         :fields="fields"
@@ -377,5 +376,12 @@ export default {
     width: 100%;
     justify-content: space-evenly;
   }
+
+  /*div.modal.results-modal .modal-dialog {
+    height: 80% !important;
+  }*/
+
+  
+
 </style>
 

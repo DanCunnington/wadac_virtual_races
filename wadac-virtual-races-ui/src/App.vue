@@ -35,4 +35,13 @@
 #nav a.router-link-exact-active {
   color: #42b983;
 }
+div.modal .modal-full {
+  height: 100% !important;
+  max-width: 80%;
+}
+
+div.modal .modal-full .modal-content{
+  max-height: 80% !important;
+}
+
 </style>
