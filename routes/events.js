@@ -47,6 +47,26 @@ module.exports = (app, db) => {
 		})
 	})
 
+	app.post('/delete_event', (req, res) => {
+		let _id = req.body._id
+
+		if (!_id) {
+			res.status(400)
+			return res.json({"err": "please specify event id to delete."})
+		}
+
+		// Insert to database
+		let query = {"_id": ObjectID(_id)}
+		db.collection('events').deleteOne(query, (err, result) => {
+			if (err) {
+				res.status(500)
+				return res.json({"err": JSON.stringify(err)})
+			} else {
+				res.sendStatus(200)
+			}
+		})
+	})
+
 	app.get('/active_events', (req, res) => {
 		// Get active events from the database 
 		let current_time = Date.now()

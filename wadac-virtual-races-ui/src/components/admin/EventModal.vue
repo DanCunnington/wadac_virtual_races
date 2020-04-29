@@ -20,11 +20,6 @@
                 <b-form-datepicker id="end-datepicker" v-model="ev_end_date" :state="end_state" class="mb-2"></b-form-datepicker>
             </div>
         </div>
-        <!-- <div class="form-group row">
-          <div class="col-sm-12">
-            <button type="submit" class="btn btn-primary float-right">Create</button>
-          </div>
-        </div> -->
      </form>
   </div>
 </template>
@@ -71,19 +66,22 @@ export default {
       }
     },
     validateEvent() {
-      if (!this.ev_start_date) {
+      return new Promise((resolve, reject) => {
+        if (!this.ev_start_date) {
             this.notification = 'Please select an event start date'
             this.start_state = false
-            return setTimeout(() => {
+            setTimeout(() => {
                 this.notification = ''
             }, 2000)
+            reject()
         }
         if (!this.ev_end_date) {
             this.notification = 'Please select an event end date'
             this.end_state = false
-            return setTimeout(() => {
+            setTimeout(() => {
                 this.notification = ''
             }, 2000)
+            reject()
         }
         let picked_start = this.ev_start_date.split('-')
         let picked_end = this.ev_end_date.split('-')
@@ -95,47 +93,54 @@ export default {
             "start_time": start_date,
             "end_time": end_date
         }
-        return new_event
+        resolve(new_event)
+      })
     },
     createEvent() {
       return new Promise((resolve, reject) => {
-        let new_event = this.validateEvent()
-        this.ev_name = ''
-        this.ev_start_date = ''
-        this.ev_end_date = ''
-        API.newEvent(new_event).then(response => {
-            if (Object.keys(response).indexOf('err') > -1) {
-                console.log(response.err)
-                this.notification = 'Error: Event not created.'
-                setTimeout(() => {
-                    this.notification = ''
-                }, 2000)
-            } else {
-                // this.notification = 'Event '+this.ev_name +' created.'
-                // setTimeout(() => {
-                //     this.notification = ''
-                // }, 2000)
-                resolve(new_event)
-            }
+        this.validateEvent().then(new_event => {
+          this.ev_name = ''
+          this.ev_start_date = ''
+          this.ev_end_date = ''
+          API.newEvent(new_event).then(response => {
+              if (Object.keys(response).indexOf('err') > -1) {
+                  console.log(response.err)
+                  this.notification = 'Error: Event not created.'
+                  setTimeout(() => {
+                      this.notification = ''
+                  }, 2000)
+              } else {
+                  // this.notification = 'Event '+this.ev_name +' created.'
+                  // setTimeout(() => {
+                  //     this.notification = ''
+                  // }, 2000)
+                  resolve(new_event)
+              }
+          })
+        }, err => {
+          // modal will still show and errors populated from validation
         })
       })
     },
     editEvent() {
       return new Promise((resolve, reject) => {
-        let new_event = this.validateEvent()
-        this.ev_name = ''
-        this.ev_start_date = ''
-        this.ev_end_date = ''
-        API.editEvent(this.existing.ev_id, new_event).then(response => {
-          if (Object.keys(response).indexOf('err') > -1) {
-              console.log(response.err)
-              this.notification = 'Error: Event not edited.'
-              setTimeout(() => {
-                  this.notification = ''
-              }, 2000)
-          } else {
-              resolve(new_event)
-          }
+        this.validateEvent().then(new_event => {
+          this.ev_name = ''
+          this.ev_start_date = ''
+          this.ev_end_date = ''
+          API.editEvent(this.existing.ev_id, new_event).then(response => {
+            if (Object.keys(response).indexOf('err') > -1) {
+                console.log(response.err)
+                this.notification = 'Error: Event not edited.'
+                setTimeout(() => {
+                    this.notification = ''
+                }, 2000)
+            } else {
+                resolve(new_event)
+            }
+          }, err => {
+            // modal will still show and errors populated from validation
+          });
         })
       })
     }

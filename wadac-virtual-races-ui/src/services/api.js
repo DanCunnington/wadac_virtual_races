@@ -69,6 +69,10 @@ export default {
 		return Vue.prototype.$http.post(server_url+'/edit_event', evt)
 	},
 
+	deleteEvent(evt_id) {
+		return Vue.prototype.$http.post(server_url+'/delete_event', {"_id": evt_id})
+	},
+
 	eventResults(evt_id) {
 		return Vue.prototype.$http.get(server_url+'/event_results?event_id='+evt_id)
 	},
