@@ -39,7 +39,7 @@
         </b-modal>
 
         
-        <b-modal id="results-modal" class="results-modal" size="xl" :title="modal_results_title">
+        <b-modal id="results-modal" class="results-modal" size="full" :title="modal_results_title">
           <ResultsModal ref="results_modal" :preview_results_set="preview_results_set"></ResultsModal>
           <template v-slot:modal-footer="{ hide }">
             <b-button variant="outline-secondary" @click="hide()">

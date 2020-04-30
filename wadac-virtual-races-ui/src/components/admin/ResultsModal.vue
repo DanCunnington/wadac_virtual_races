@@ -56,5 +56,8 @@ export default {
     font-style: italic;
   }
 
+  .results-table {
+    max-height: none !important;
+  }
 </style>
 

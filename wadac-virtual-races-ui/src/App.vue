@@ -41,7 +41,11 @@ div.modal .modal-full {
 }
 
 div.modal .modal-full .modal-content{
-  max-height: 80% !important;
+  height: 80% !important;
+}
+
+div.modal .modal-full .modal-body{
+  overflow-y: scroll
 }
 
 </style>
