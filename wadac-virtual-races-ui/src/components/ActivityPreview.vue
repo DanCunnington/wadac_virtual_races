@@ -109,8 +109,8 @@ export default {
 
   ul.list-stats li {
     margin-left: 0;
-    margin-right: 16px;
-    padding-right: 16px;
+    margin-right: 10px;
+    padding-right: 10px;
     position: relative;
   }
 

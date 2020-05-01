@@ -299,7 +299,7 @@ export default {
           response.data.forEach(r => {
             let activity_name = ''
             if (Object.keys(r).indexOf('activity_name') > -1) {
-                activity_name = r['activity_name']
+                activity_name = r['activity_name'].replace(/,/g,'-')
             }
             tmp_csv.push([r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
           })
