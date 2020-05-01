@@ -292,7 +292,7 @@ export default {
           console.log(response.err)
         } else {
           console.log(response.data)
-          let headers = ['athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+          let headers = ['start_date', 'athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
             
           // Download the results as csv
           let tmp_csv = [headers]
@@ -301,7 +301,11 @@ export default {
             if (Object.keys(r).indexOf('activity_name') > -1) {
                 activity_name = r['activity_name'].replace(/,/g,'-')
             }
-            tmp_csv.push([r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+            let start_date = ''
+            if (Object.keys(r).indexOf('start_date') > -1) {
+                start_date = r['start_date']
+            }
+            tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
           })
           let csvContent = tmp_csv.map(e => e.join(",")).join("\n");
           var download = function(content, fileName, mimeType) {

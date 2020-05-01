@@ -25,6 +25,7 @@ export default {
       fields: [
         {"key": "athlete_name", "sortable": false},
         {"key": "activity_name", "sortable": false},
+        {"key": "start_date", "sortable": false},
         {"key": "elapsed_time", "label": "Elapsed Time (s)", "sortable": false},
         {"key": "moving_time", "label": "Moving Time (s)", "sortable": false},
         {"key": "elevation_gain", "label": "Elevation Gain (ft)", "sortable": false},

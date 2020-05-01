@@ -2,6 +2,7 @@
   <div class="submit-result">
     <div v-if="!submitted" class="not_submitted">
       <h2>Submit Result</h2>
+      <p class="err_notification">{{err_notification}}</p>
 
       <form @submit.prevent="submitResult">
         <div class="form-group row">
@@ -79,7 +80,8 @@ export default {
       full_events: [],
       submitted: false,
       event_date_str: '',
-      loading: true
+      loading: true,
+      err_notification: ''
     }
   },
   mounted() {
@@ -91,7 +93,11 @@ export default {
       let start = new Date(e.start_time)
       let end = new Date(e.end_time)
       this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
-      this.filterActivities(e)      
+      this.filterActivities(e)
+      this.err_notification = '' 
+    },
+    selected_activity: function() {
+      this.err_notification = ''
     }
   },
   methods: {
@@ -167,13 +173,21 @@ export default {
       this.activities = new_activities
       this.full_activities = new_full_activities
     },
+    handleDuplicateSubmitError() {
+      this.err_notification = 'You have already submitted this activity for this event. Please choose another activity.'
+    },
+    handleGenericSubmitError() {
+      this.err_notification = 'Error submitting results. Please contact Dan Cunnington.'
+    },
     submitResult() {
       let selected_acc = this.full_activities[this.selected_activity]
       let selected_event = this.full_events[this.selected_event]
       let new_result = {
         "event_id": selected_event._id,
         "athlete_name": this.cookie.user_name,
+        "activity_id": selected_acc.id,
         "activity_name": selected_acc.name,
+        "start_date": selected_acc.start_date_local,
         "elapsed_time": selected_acc.elapsed_time,
         "moving_time": selected_acc.moving_time,
         "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281),
@@ -182,9 +196,29 @@ export default {
       API.submitResult(new_result).then(response => {
         if (Object.keys(response).indexOf('err') > -1) {
           console.log(response.err)
+          this.handleGenericSubmitError()
         } else {
           // Done
           this.submitted = true
+          this.err_notification = ''
+        }
+      }, err => {
+        if (Object.keys(err).indexOf('response') > -1 && err.response) {
+          let msg = err.response.data
+          if (Object.keys(msg).indexOf('err') > -1) {
+            if (msg.err == 'result already inserted') {
+              this.handleDuplicateSubmitError()
+            } else {
+              console.log(err)
+              this.handleGenericSubmitError()
+            }
+          } else {
+            console.log(err)
+            this.handleGenericSubmitError()
+          }
+        } else {
+          console.log(err)
+          this.handleGenericSubmitError()
         }
       })
     }
@@ -217,6 +251,10 @@ export default {
 
   p.event_dates {
     margin-bottom: 0px;
+  }
+
+  p.err_notification {
+    color: red;
   }
 
 </style>
