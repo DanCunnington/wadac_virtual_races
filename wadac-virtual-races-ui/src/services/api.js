@@ -32,6 +32,10 @@ export default {
 		})
 	},
 
+	signout(access_token) {
+		return Vue.prototype.$http.get(server_url+'/signout?access_token='+access_token)
+	},
+
 	getActiveEvents() {
 		return Vue.prototype.$http.get(server_url+'/active_events')
 	},

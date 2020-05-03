@@ -42,4 +42,14 @@ module.exports = (app, db, strava, auth_creds) => {
 			res.json({"logged_in": false})	
 		}
 	})
+
+	app.get('/signout', (req, res) => {
+		strava.oauth.deauthorize(req.query).then((body) => {
+			res.sendStatus(200)
+		}, err => {
+			console.log('failed')
+			res.status(500)
+			return res.json({"err": err})
+		})
+	})
 }

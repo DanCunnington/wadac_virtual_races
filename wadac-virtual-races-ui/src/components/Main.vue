@@ -4,7 +4,8 @@
     <p v-if="!cookie.access_token">Hi there. Please log in to Strava using the button below. This application requires access to your activities in order to submit a result.</p>
     <img v-if="!cookie.access_token" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
     <div v-if="cookie.access_token">
-      <p>Hi, {{cookie.user_name}}!</p>
+      <p class="name">Hi, {{cookie.user_name}}!</p>
+      <p class="signout" @click="signout()">Sign out?</p>
 
       <div class="content">
         <SubmitResult :cookie="cookie"></SubmitResult>
@@ -135,6 +136,13 @@ export default {
           this.$router.push('/') 
         }
       })
+    },
+    signout() {
+      API.signout(this.cookie.access_token).then(response => {
+        this.deauthorise()
+      }, err => {
+        this.deauthorise()
+      })
     }
   }
 }
@@ -174,6 +182,18 @@ button:disabled {
 }
 
 h1.hover-cursor {
+  cursor: pointer
+}
+
+p.name {
+  margin: 0;
+}
+
+p.signout {
+  text-decoration: underline;
+}
+
+p.signout:hover {
   cursor: pointer
 }
 
