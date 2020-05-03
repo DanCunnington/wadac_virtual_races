@@ -5,7 +5,7 @@
     <img v-if="!cookie.access_token" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
     <div v-if="cookie.access_token">
       <p class="name">Hi, {{cookie.user_name}}!</p>
-      <p class="signout" @click="signout()">Sign out?</p>
+      <p class="signout" @click="deauthorise()">Sign out?</p>
 
       <div class="content">
         <SubmitResult :cookie="cookie"></SubmitResult>
@@ -135,13 +135,6 @@ export default {
           this.cookie = cookie
           this.$router.push('/') 
         }
-      })
-    },
-    signout() {
-      API.signout(this.cookie.access_token).then(response => {
-        this.deauthorise()
-      }, err => {
-        this.deauthorise()
       })
     }
   }
