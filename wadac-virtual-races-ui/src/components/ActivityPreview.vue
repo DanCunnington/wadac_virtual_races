@@ -59,13 +59,15 @@ export default {
   methods: {
     initialise() {
       this.map = this.$refs.map.mapObject
-      let coordinates = L.Polyline.fromEncoded(this.activity.map.summary_polyline).getLatLngs();
-      L.polyline(coordinates, {
-        color: 'rgb(255,0,14)',
-        weight: 2,
-        lineJoin: 'round'
-      }).addTo(this.map)
-      this.map.fitBounds(coordinates)
+      if (this.activity.map.summary_polyline) {
+        let coordinates = L.Polyline.fromEncoded(this.activity.map.summary_polyline).getLatLngs();
+        L.polyline(coordinates, {
+          color: 'rgb(255,0,14)',
+          weight: 2,
+          lineJoin: 'round'
+        }).addTo(this.map)
+        this.map.fitBounds(coordinates)
+      }
 
       // Setup data
       this.distance_miles = (this.activity.distance / 1609).toFixed(2)
