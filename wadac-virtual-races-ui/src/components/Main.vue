@@ -61,9 +61,7 @@ export default {
             this.cookie = cookie
             console.log('exists')
           } else {
-            this.refreshAccessToken(cookie).then(_ => {
-              console.log('refreshed')
-            })
+            this.refreshAccessToken(cookie)
           }
         } else {
           // For callback, get access token
@@ -92,32 +90,39 @@ export default {
     deauthorise() {
       this.cookie = {access_token: false}
       this.$cookie.delete('wadac_virtual_races');
-      this.$router.go()
+      // Route to homepage
+      let query_params = this.$route.query
+      if (query_params && Object.keys(query_params).indexOf('code') > -1 && 
+        Object.keys(query_params).indexOf('scope') > -1) {
+        this.$router.push('/') 
+      } else {
+        this.$router.go()
+      }
     },
     directToStrava() {
       let url = `https://www.strava.com/oauth/authorize?client_id=${this.strava_client_id}&redirect_uri=${this.callback_url}&response_type=code&scope=activity:read`
       window.location.href=url
     },
     refreshAccessToken(c) {
-      return new Promise((resolve, reject) => {
-        let refresh_token = c.refresh_token
-        let user_name = c.user_name
-        API.refreshAccessToken(refresh_token).then(response => {
-          if (Object.keys(response).indexOf('err') > -1) {
-            console.log(response.err)
-            reject()
-          } else {
-            let new_cookie = {
-              "access_token": response.data.access_token,
-              "refresh_token": response.data.refresh_token,
-              "user_name": user_name,
-              "expires_at": response.data.expires_at
-            }
-            this.$cookie.set('wadac_virtual_races', JSON.stringify(new_cookie), 30)
-            this.cookie = new_cookie
-            resolve()
+      let refresh_token = c.refresh_token
+      let user_name = c.user_name
+      API.refreshAccessToken(refresh_token).then(response => {
+        if (Object.keys(response).indexOf('err') > -1) {
+          console.log(response.err)
+          reject()
+        } else {
+          let new_cookie = {
+            "access_token": response.data.access_token,
+            "refresh_token": response.data.refresh_token,
+            "user_name": user_name,
+            "expires_at": response.data.expires_at
           }
-        })
+          this.$cookie.set('wadac_virtual_races', JSON.stringify(new_cookie), 30)
+          this.cookie = new_cookie
+          console.log('refreshed')
+        }
+      }, err => {
+        this.deauthorise()
       })
     },
     getAccessToken(code) {
@@ -135,6 +140,8 @@ export default {
           this.cookie = cookie
           this.$router.push('/') 
         }
+      }, err => {
+        this.deauthorise()
       })
     }
   }

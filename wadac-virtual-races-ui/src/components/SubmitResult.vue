@@ -30,7 +30,7 @@
                 <div class="row">
                   <legend class="col-form-label col-sm-3 pt-0">Activity</legend>
                   <div class="col-sm-9 activity-container">
-                    <div class="form-check" v-for="(activity, idx) in full_activities">
+                    <div class="form-check activity-check" v-for="(activity, idx) in full_activities">
                       <input class="form-check-input position-static" type="radio" name="activity-radio" v-model="selected_activity" :id="activity.id" :value="idx" required>
                       <ActivityPreview :activity="activity"></ActivityPreview>
                     </div>
@@ -179,6 +179,9 @@ export default {
     handleGenericSubmitError() {
       this.err_notification = 'Error submitting results. Please contact Dan Cunnington.'
     },
+    handleZeroActivityError() {
+      this.err_notification = 'You have tried to submit an activity with 0 miles or 0 seconds. Please submit another activity.'
+    },
     submitResult() {
       let selected_acc = this.full_activities[this.selected_activity]
       let selected_event = this.full_events[this.selected_event]
@@ -190,24 +193,29 @@ export default {
         "start_date": selected_acc.start_date_local,
         "elapsed_time": selected_acc.elapsed_time,
         "moving_time": selected_acc.moving_time,
-        "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281),
+        "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281).toString(),
         "distance": (selected_acc.distance / 1609).toFixed(2)
       }
-      API.submitResult(new_result).then(response => {
-        if (Object.keys(response).indexOf('err') > -1) {
-          console.log(response.err)
-          this.handleGenericSubmitError()
-        } else {
-          // Done
-          this.submitted = true
-          this.err_notification = ''
-        }
-      }, err => {
-        if (Object.keys(err).indexOf('response') > -1 && err.response) {
-          let msg = err.response.data
-          if (Object.keys(msg).indexOf('err') > -1) {
-            if (msg.err == 'result already inserted') {
-              this.handleDuplicateSubmitError()
+      if (new_result.elapsed_time && new_result.moving_time && new_result.distance) {
+        API.submitResult(new_result).then(response => {
+          if (Object.keys(response).indexOf('err') > -1) {
+            console.log(response.err)
+            this.handleGenericSubmitError()
+          } else {
+            // Done
+            this.submitted = true
+            this.err_notification = ''
+          }
+        }, err => {
+          if (Object.keys(err).indexOf('response') > -1 && err.response) {
+            let msg = err.response.data
+            if (Object.keys(msg).indexOf('err') > -1) {
+              if (msg.err == 'result already inserted') {
+                this.handleDuplicateSubmitError()
+              } else {
+                console.log(err)
+                this.handleGenericSubmitError()
+              }
             } else {
               console.log(err)
               this.handleGenericSubmitError()
@@ -216,11 +224,10 @@ export default {
             console.log(err)
             this.handleGenericSubmitError()
           }
-        } else {
-          console.log(err)
-          this.handleGenericSubmitError()
-        }
-      })
+        })
+      } else {
+        this.handleZeroActivityError()
+      }
     }
   }
 }
@@ -243,6 +250,12 @@ export default {
   .activity-container {
     max-height: 400px;
     overflow-y: scroll;
+    border: solid 1px #eee;
+    border-radius: 10px;
+  }
+
+  .activity-check {
+    padding-top: 15px;
   }
 
   .event_dates {

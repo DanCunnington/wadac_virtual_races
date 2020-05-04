@@ -32,6 +32,10 @@ module.exports = (app, db, strava, auth_creds) => {
 			refresh_token = body.refresh_token
 			res.json({access_token, refresh_token, expires_at})
 		})
+		.catch((err) => {
+			res.status(500)
+			res.json({"err": err})
+		})
 	})
 
 	app.post('/is_admin', (req, res) => {

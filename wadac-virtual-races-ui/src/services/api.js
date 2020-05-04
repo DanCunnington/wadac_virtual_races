@@ -17,7 +17,15 @@ export default {
 	},
 
 	refreshAccessToken(refresh_token) {
-		return Vue.prototype.$http.get(server_url+'/refresh_access_token?refresh_token='+refresh_token)
+		return new Promise((resolve, reject) => {
+			Vue.prototype.$http.get(server_url+'/refresh_access_token?refresh_token='+refresh_token).then(response => {
+				return resolve(response)
+			}, err => {
+				console.log('refresh token invalid, time to deauth')
+				reject()
+			})
+		})
+		
 	},
 
 	getAccessToken(code) {
@@ -27,7 +35,7 @@ export default {
 				return resolve(response)
 			}, err => {
 				console.log(err)
-				this.clearCookie()
+				reject()
 			})
 		})
 	},
@@ -42,10 +50,10 @@ export default {
 
 	getAthleteActivities(access_token) {
 		return new Promise((resolve, reject) => {
-			// If access token is invalid, deauthorise
 			Vue.prototype.$http.get(server_url+'/athlete_activities?access_token='+access_token).then(response => {
 				return resolve(response)
 			}, err => {
+				// If access token is invalid, deauthorise
 				console.log(err)
 				this.clearCookie()
 			})	

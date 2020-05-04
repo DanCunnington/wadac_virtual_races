@@ -15,7 +15,7 @@ module.exports = (app, db) => {
 		if (!event_id || !activity_name || !activity_id || !start_date || !athlete_name || 
 			!elapsed_time || !moving_time || ! elevation_gain || !distance) {
 			res.status(400)
-			return res.json({"err": "please specify event_id, athlete_name, activity_id "+
+			return res.json({"err": "please specify event_id, athlete_name, activity_id, "+
 				"activity_name, start_date, elapsed_time, moving_time, elevation_gain and distance"})
 		}
 
@@ -45,7 +45,7 @@ module.exports = (app, db) => {
 				res.status(500)
 				return res.json({"err": JSON.stringify(err)})
 			} else {
-				
+
 				// If none - go ahead and submit
 				if (m_result.length == 0) {
 					insertResultToDb()
