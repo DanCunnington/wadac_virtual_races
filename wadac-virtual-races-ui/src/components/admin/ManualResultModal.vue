@@ -3,20 +3,20 @@
     <p class="notification">{{err_notification}}</p>
     <form class="ev-form">
         <div class="form-group row">
-          <label for="name" class="col-sm-3 col-form-label">Athlete Name</label>
-          <div class="col-sm-9">
+          <label for="name" class="col-sm-4 col-form-label">Athlete Name</label>
+          <div class="col-sm-8">
             <input type="text" class="form-control" id="name" v-model="athlete_name" required>
           </div>
         </div>
         <div class="form-group row">
-          <label for="event" class="col-sm-3 col-form-label">Event</label>
-          <div class="col-sm-9">
+          <label for="event" class="col-sm-4 col-form-label">Event</label>
+          <div class="col-sm-8">
             <b-form-select v-model="selected_event" :options="events" required></b-form-select>
           </div>
         </div>
         <div class="form-group row" v-if="selected_event != null">
-          <label for="event" class="col-sm-3 col-form-label">Event Dates</label>
-          <div class="col-sm-9 event_dates">
+          <label for="event" class="col-sm-4 col-form-label">Event Dates</label>
+          <div class="col-sm-8 event_dates">
             <p class="event_dates">{{event_date_str}}</p>
           </div>
         </div>
@@ -24,14 +24,14 @@
         <div v-if="selected_event != null">
           <div v-if="selected_event_wcr">
             <div class="form-group row">
-              <label for="wcr-team" class="col-sm-3 col-form-label">Team</label>
-              <div class="col-sm-9">
+              <label for="wcr-team" class="col-sm-4 col-form-label">Team</label>
+              <div class="col-sm-8">
                 <b-form-select v-model="selected_team" :options="wcr_teams" default="Please select a team" required></b-form-select>
               </div>
             </div>
             <div class="form-group row">
-              <label for="wcr-stage" class="col-sm-3 col-form-label">Stage</label>
-              <div class="col-sm-9">
+              <label for="wcr-stage" class="col-sm-4 col-form-label">Stage</label>
+              <div class="col-sm-8">
                 <b-form-select v-model="selected_stage" :options="wcr_stages" required></b-form-select>
               </div>
             </div>
@@ -40,29 +40,51 @@
 
         <div v-if="selected_event != null">
           <div class="form-group row">
-            <label for="elapsed_time" class="col-sm-3 col-form-label">Elapsed Time (s)</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="elapsed_time" v-model="elapsed_time" required>
+            <label for="elapsed_time" class="col-sm-4 col-form-label">Elapsed Time</label>
+            <div class="hms-container col-sm-8">
+              <div class="hms-inner">
+                <input type="text" class="form-control" id="elapsed_time_h" v-model="elapsed_time_h" required>
+                <div class="hms-units">hrs</div>
+              </div>
+              <div class="hms-inner">
+                <input type="text" class="form-control" id="elapsed_time_m" v-model="elapsed_time_m" required>
+                <div class="hms-units">mins</div>
+              </div>
+              <div class="hms-inner">
+                <input type="text" class="form-control" id="elapsed_time_s" v-model="elapsed_time_s" required>
+                <div class="hms-units">secs</div>
+              </div>
             </div>
           </div>
 
           <div class="form-group row">
-            <label for="moving_time" class="col-sm-3 col-form-label">Moving Time (s)</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="moving_time" v-model="moving_time" required>
+            <label for="elapsed_time" class="col-sm-4 col-form-label">Moving Time</label>
+            <div class="hms-container col-sm-8">
+              <div class="hms-inner">
+                <input type="text" class="form-control" id="moving_time_h" v-model="moving_time_h" required>
+                <div class="hms-units">hrs</div>
+              </div>
+              <div class="hms-inner">
+                <input type="text" class="form-control" id="moving_time_m" v-model="moving_time_m" required>
+                <div class="hms-units">mins</div>
+              </div>
+              <div class="hms-inner">
+                <input type="text" class="form-control" id="moving_time_s" v-model="moving_time_s" required>
+                <div class="hms-units">secs</div>
+              </div>
             </div>
           </div>
 
           <div class="form-group row">
-            <label for="distance" class="col-sm-3 col-form-label">Distance (mi)</label>
-            <div class="col-sm-9">
+            <label for="distance" class="col-sm-4 col-form-label">Distance (mi)</label>
+            <div class="col-sm-8">
               <input type="text" class="form-control" id="distance" v-model="distance" required>
             </div>
           </div>
 
           <div class="form-group row">
-            <label for="elevation_gain" class="col-sm-3 col-form-label">Elevation Gain (ft)</label>
-            <div class="col-sm-9">
+            <label for="elevation_gain" class="col-sm-4 col-form-label">Elevation Gain (ft)</label>
+            <div class="col-sm-8">
               <input type="text" class="form-control" id="elevation_gain" v-model="elevation_gain" required>
             </div>
           </div>
@@ -94,7 +116,12 @@ export default {
       event_date_str: '',
       wcr_teams: [],
       wcr_stages: [],
-      elapsed_time: null,
+      elapsed_time_h: 0,
+      elapsed_time_m: 0,
+      elapsed_time_s: 0,
+      moving_time_h: 0,
+      moving_time_m: 0,
+      moving_time_s: 0,
       moving_time: null,
       distance: null,
       elevation_gain: null
@@ -183,16 +210,19 @@ export default {
           }
         }
 
-        if (!this.elapsed_time) {
-          this.err_notification = 'Please enter elapsed time in seconds'
+        // Calculate elapsed time in seconds
+        let elapsed_time = (3600*this.elapsed_time_h) + (60*this.elapsed_time_m) + this.elapsed_time_s
+        if (elapsed_time <= 0) {
+          this.err_notification = 'Please enter elapsed time'
             setTimeout(() => {
                 this.err_notification = ''
             }, 2000)
             return reject()
         }
 
-        if (!this.moving_time) {
-          this.err_notification = 'Please enter moving time in seconds'
+        let moving_time = (3600*this.moving_time_h) + (60*this.moving_time_m) + this.moving_time_s
+        if (moving_time <= 0) {
+          this.err_notification = 'Please enter moving time'
             setTimeout(() => {
                 this.err_notification = ''
             }, 2000)
@@ -224,8 +254,8 @@ export default {
           "activity_id": ac_name_id,
           "activity_name": ac_name_id,
           "start_date": current_date,
-          "elapsed_time": this.elapsed_time,
-          "moving_time": this.moving_time,
+          "elapsed_time": elapsed_time,
+          "moving_time": moving_time,
           "elevation_gain": this.elevation_gain,
           "distance": this.distance,
           "wcr": false
@@ -273,6 +303,28 @@ export default {
     margin: 0 auto;
   }
 
+  .hms-container {
+    display: flex;
+    padding-top: 7px;
+  }
+
+  .hms-inner {
+    display: flex;
+  }
+
+  .hms-inner input {
+    max-width: 50%;
+  }
+
+  .hms-inner {
+    line-height: 40px;
+  }
+
+  .hms-units {
+    font-size: small;
+    margin-left: 5px;
+  }
+
   .ev-form {
     max-width: 90%;
     margin: 0 auto;
@@ -284,6 +336,11 @@ export default {
 
   p.notification {
     color: red;
+  }
+
+  p.event_dates {
+    margin-bottom: 0;
+    line-height: 40px;
   }
 </style>
 
