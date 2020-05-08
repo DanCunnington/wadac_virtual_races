@@ -322,10 +322,13 @@ export default {
           let wcr_event = item.wcr_event
           let headers = []
           if (wcr_event) {
-            headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+            headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft', 
+            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds']
 
           } else {
-            headers = ['start_date', 'athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+            headers = ['start_date', 'athlete_name', 'activity_name', 
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
           }
             
           // Download the results as csv
@@ -340,9 +343,19 @@ export default {
                 start_date = r['start_date']
             }
             if (wcr_event) {
-              tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+              // Adjust time to match WCR stage
+              let adj_obj = API.calculateAdjustedWCRTime(parseInt(r['wcr_stage']), parseFloat(r['distance']), 
+                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
+              let adj_time = adj_obj['adj_time']
+              let ref_dist = adj_obj['ref_distance']
+              let ref_elev = adj_obj['ref_elevation_gain']
+
+              tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
+                activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
+                ref_dist, ref_elev, adj_time])
             } else {
-              tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+              tmp_csv.push([start_date, r['athlete_name'], activity_name, 
+                r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
             }
           })
           let csvContent = tmp_csv.map(e => e.join(",")).join("\n");

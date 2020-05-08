@@ -98,32 +98,65 @@ export default {
             { value: null, text: 'Please select a stage', disabled: true },
             { label: 'Day 1',
               options: [
-                { value: 1, text: '1 - NOT Caernarfon Castle to Penygroes'},
-                { value: 2, text: '2 - NOT Penygroes to Criccieth Castle'},
-                { value: 3, text: '3 - NOT Criccieth Castle to Maentwrog'},
-                { value: 4, text: '4 - NOT Maentwrog to Harlech Castle'},
-                { value: 5, text: '5 - NOT Harlech Castle to Barmouth'},
-                { value: 6, text: '6 - NOT Barmouth to Dolgellau'},
-                { value: 7, text: '7 - NOT Dolgellau to Dinas Mawddwy'},
-                { value: 8, text: '8 - NOT Dinas Mawddwy to Foel'},
-                { value: 9, text: '9 - NOT Foel to  Llanfair Caereinion'},
-                { value: 10, text: '10 - NOT Llanfair Caereinion to Newtown'}
+                { value: 1, text: '1 - NOT Caernarfon Castle to Penygroes', ref_distance: 9.1, ref_elevation_gain: 447},
+                { value: 2, text: '2 - NOT Penygroes to Criccieth Castle', ref_distance: 10.7, ref_elevation_gain: 370},
+                { value: 3, text: '3 - NOT Criccieth Castle to Maentwrog', ref_distance: 12.3, ref_elevation_gain: 938},
+                { value: 4, text: '4 - NOT Maentwrog to Harlech Castle', ref_distance: 9.5, ref_elevation_gain: 482},
+                { value: 5, text: '5 - NOT Harlech Castle to Barmouth', ref_distance: 9.6, ref_elevation_gain: 461},
+                { value: 6, text: '6 - NOT Barmouth to Dolgellau', ref_distance: 10.7, ref_elevation_gain: 694},
+                { value: 7, text: '7 - NOT Dolgellau to Dinas Mawddwy', ref_distance: 10.1, ref_elevation_gain: 1473},
+                { value: 8, text: '8 - NOT Dinas Mawddwy to Foel', ref_distance: 10.8, ref_elevation_gain: 1018},
+                { value: 9, text: '9 - NOT Foel to  Llanfair Caereinion', ref_distance: 8.5, ref_elevation_gain: 325},
+                { value: 10, text: '10 - NOT Llanfair Caereinion to Newtown', ref_distance: 13.1, ref_elevation_gain: 1111}
               ]
             },
             { label: 'Day 2',
               options: [
-                { value: 11, text: '11 - NOT Newtown to Llanbadarn Fynydd'},
-                { value: 12, text: '12 - NOT Llanbadarn Fynydd to Crossgates'},
-                { value: 13, text: '13 - NOT Crossgates to Builth Wells'},
-                { value: 14, text: '14 - NOT Builth Wells to Drovers Arms'},
-                { value: 15, text: '15 - NOT Epynt Visitor Centre to Brecon'},
-                { value: 16, text: '16 - NOT Brecon to Torpantau'},
-                { value: 17, text: '17 - NOT Taf Fechan Railway Station to Cyfarthfa Castle'},
-                { value: 18, text: '18 - NOT Merthyr Tydfil to Abercynon'},
-                { value: 19, text: '19 - NOT Abercynon to Nantgarw'},
-                { value: 20, text: '20 - NOT Caerphilly Castle to Cardiff Castle'}
+                { value: 11, text: '11 - NOT Newtown to Llanbadarn Fynydd', ref_distance: 10.8, ref_elevation_gain: 1239},
+                { value: 12, text: '12 - NOT Llanbadarn Fynydd to Crossgates', ref_distance: 11.2, ref_elevation_gain: 503},
+                { value: 13, text: '13 - NOT Crossgates to Builth Wells', ref_distance: 10.6, ref_elevation_gain: 523},
+                { value: 14, text: '14 - NOT Builth Wells to Drovers Arms', ref_distance: 10.8, ref_elevation_gain: 1619},
+                { value: 15, text: '15 - NOT Epynt Visitor Centre to Brecon', ref_distance: 12.8, ref_elevation_gain: 496},
+                { value: 16, text: '16 - NOT Brecon to Torpantau', ref_distance: 12.5, ref_elevation_gain: 1179},
+                { value: 17, text: '17 - NOT Taf Fechan Railway Station to Cyfarthfa Castle', ref_distance: 8.7, ref_elevation_gain: 407},
+                { value: 18, text: '18 - NOT Merthyr Tydfil to Abercynon', ref_distance: 9.1, ref_elevation_gain: 404},
+                { value: 19, text: '19 - NOT Abercynon to Nantgarw', ref_distance: 7.7, ref_elevation_gain: 278},
+                { value: 20, text: '20 - NOT Caerphilly Castle to Cardiff Castle', ref_distance: 9.9, ref_elevation_gain: 205}
               ]
             }
         ]
+    },
+    calculateAdjustedWCRTime(stage, recorded_distance, recorded_time, recorded_elevation_gain) {
+        let stageInfo = this.getWCRStages()
+        let dayOne = stageInfo[1].options
+        let dayTwo = stageInfo[2].options
+
+        let ref_distance = null
+        let ref_elevation_gain = null
+        if (stage <= 10) {
+            dayOne.forEach(s => {
+                if (s.value == stage) {
+                    ref_distance = s.ref_distance
+                    ref_elevation_gain = s.ref_elevation_gain
+                }
+            })
+        } else {
+            dayTwo.forEach(s => {
+                if (s.value == stage) {
+                    ref_distance = s.ref_distance
+                    ref_elevation_gain = s.ref_elevation_gain
+                }
+            })
+        }
+        if (!ref_distance || !ref_elevation_gain) {
+            return false
+        } else {
+            let dist_factor = recorded_distance / ref_distance
+            let adj_distance = recorded_time / dist_factor
+            let adj_elev = Math.pow((ref_elevation_gain / (recorded_elevation_gain / dist_factor)),0.05)
+            let adj_time = parseInt(adj_distance * adj_elev)
+
+            return {adj_time, ref_distance, ref_elevation_gain}
+        }
     }
 }
