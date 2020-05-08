@@ -16,21 +16,13 @@
 
 export default {
   name: 'ResultsModal',
-  props: [ 'preview_results_set'],
+  props: [ 'preview_results_set', 'wcr'],
   components: {
     
   },
   data () {
     return {
-      fields: [
-        {"key": "athlete_name", "sortable": false},
-        {"key": "activity_name", "sortable": false},
-        {"key": "start_date", "sortable": false},
-        {"key": "elapsed_time", "label": "Elapsed Time (s)", "sortable": false},
-        {"key": "moving_time", "label": "Moving Time (s)", "sortable": false},
-        {"key": "elevation_gain", "label": "Elevation Gain (ft)", "sortable": false},
-        {"key": "distance", "label": "Distance (mi)", "sortable": false}
-      ],
+      fields: [],
     }
   },
   mounted() {
@@ -42,6 +34,19 @@ export default {
   methods: {
     initialise() {
       console.log(this.preview_results_set)
+      this.fields = [
+        {"key": "start_date", "sortable": false},
+        {"key": "athlete_name", "sortable": false}
+      ]
+      if (this.wcr) {
+        this.fields.push({"key": "wcr_team", "label": "Team", "sortable": false})
+        this.fields.push({"key": "wcr_stage", "label": "Stage", "sortable": false})
+      } 
+      this.fields.push({"key": "activity_name", "sortable": false})
+      this.fields.push({"key": "elapsed_time", "label": "Elapsed Time (s)", "sortable": false})
+      this.fields.push({"key": "moving_time", "label": "Moving Time (s)", "sortable": false})
+      this.fields.push({"key": "elevation_gain", "label": "Elevation Gain (ft)", "sortable": false})
+      this.fields.push({"key": "distance", "label": "Distance (mi)", "sortable": false})   
     }    
   }
 }

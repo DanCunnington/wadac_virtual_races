@@ -40,7 +40,7 @@
 
         
         <b-modal id="results-modal" class="results-modal" size="full" :title="modal_results_title">
-          <ResultsModal ref="results_modal" :preview_results_set="preview_results_set"></ResultsModal>
+          <ResultsModal ref="results_modal" :wcr="modal_results_wcr" :preview_results_set="preview_results_set"></ResultsModal>
           <template v-slot:modal-footer="{ hide }">
             <b-button variant="outline-secondary" @click="hide()">
               Close
@@ -104,7 +104,7 @@ export default {
   },
   data () {
     return {
-      logged_in: false,
+      logged_in: true,
       password: '',
       events: [],
       fields: [
@@ -124,7 +124,8 @@ export default {
       modal_delete_title: '',
       event_to_delete: '',
       preview_results_set: [],
-      modal_results_title: ''
+      modal_results_title: '',
+      modal_results_wcr: false
     }
   },
   mounted() {
@@ -211,6 +212,12 @@ export default {
         active_text = 'Error'
       }
 
+      let wcr_event = false
+
+      if (Object.keys(e).indexOf('wcr_event') > -1) {
+        wcr_event = e.wcr_event
+      }
+
       this.events.push({
         "name": name_display, 
         "start_date": start_display, 
@@ -219,6 +226,7 @@ export default {
         "status": active_text,
         "results": '',
         "controls": "",
+        "wcr_event": wcr_event,
         "id": e._id,
       })
     },
@@ -237,7 +245,8 @@ export default {
         ev_name: current_name,
         ev_start_date: re_format_s,
         ev_end_date: re_format_e,
-        ev_id: e.id
+        ev_id: e.id,
+        ev_wcr: e.wcr_event
       }
 
       this.create_or_edit_title = 'Edit Event'
@@ -279,7 +288,7 @@ export default {
           this.preview_results_set = response.data
           let name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
           this.modal_results_title = `${name} Results Preview`
-
+          this.modal_results_wcr = item.wcr_event
           this.$nextTick(() => {
             this.$bvModal.show('results-modal')
           })
@@ -292,7 +301,14 @@ export default {
           console.log(response.err)
         } else {
           console.log(response.data)
-          let headers = ['start_date', 'athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+          let wcr_event = item.wcr_event
+          let headers = []
+          if (wcr_event) {
+            headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+
+          } else {
+            headers = ['start_date', 'athlete_name', 'activity_name', 'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+          }
             
           // Download the results as csv
           let tmp_csv = [headers]
@@ -305,7 +321,11 @@ export default {
             if (Object.keys(r).indexOf('start_date') > -1) {
                 start_date = r['start_date']
             }
-            tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+            if (wcr_event) {
+              tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+            } else {
+              tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+            }
           })
           let csvContent = tmp_csv.map(e => e.join(",")).join("\n");
           var download = function(content, fileName, mimeType) {

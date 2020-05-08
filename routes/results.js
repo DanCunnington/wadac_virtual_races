@@ -12,6 +12,11 @@ module.exports = (app, db) => {
 		let elevation_gain = req.body.elevation_gain
 		let distance = req.body.distance
 
+		// WCR
+		let wcr = req.body.wcr
+		let team = req.body.wcr_team
+		let stage = req.body.wcr_stage
+
 		if (!event_id || !activity_name || !activity_id || !start_date || !athlete_name || 
 			!elapsed_time || !moving_time || ! elevation_gain || !distance) {
 			res.status(400)
@@ -19,11 +24,22 @@ module.exports = (app, db) => {
 				"activity_name, start_date, elapsed_time, moving_time, elevation_gain and distance"})
 		}
 
+		if (wcr && (!team || !stage)) {
+			res.status(400)
+			return res.json({"err": "for wcr please specify team and stage"})
+		}
+
 		// Insert function
 		let insertResultToDb = function() {
-			// Insert to database
+			// Insert to database			
 			let result = {event_id, athlete_name, activity_id, activity_name, start_date, 
 				elapsed_time, moving_time, elevation_gain, distance}
+
+			if (wcr) {
+				result.wcr = true
+				result.wcr_team = team
+				result.wcr_stage = stage
+			}
 			db.collection('results').insertOne(result, (err, mongo_result) => {
 				if (err) {
 					res.status(500)
@@ -39,6 +55,11 @@ module.exports = (app, db) => {
 			"event_id": {$eq: event_id}, 
 			"activity_id": {$eq: activity_id}, 
 			"athlete_name": {$eq: athlete_name}
+		}
+		// For WCR also check stage and team
+		if (wcr) {
+			query.wcr_team = {$eq: team}
+			query.wcr_stage = {$eq: stage}
 		}
 		db.collection('results').find(query).toArray((err, m_result) => {
 			if (err) {

@@ -25,6 +25,22 @@
             </div>
           </div>
           <div v-if="selected_event != null">
+            <div v-if="selected_event_wcr">
+              <div class="form-group row">
+                <label for="wcr-team" class="col-sm-3 col-form-label">Team</label>
+                <div class="col-sm-9">
+                  <b-form-select v-model="selected_team" :options="wcr_teams" default="Please select a team" required></b-form-select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="wcr-stage" class="col-sm-3 col-form-label">Stage</label>
+                <div class="col-sm-9">
+                  <b-form-select v-model="selected_stage" :options="wcr_stages" required></b-form-select>
+                </div>
+              </div>
+            </div>
+
+
             <div v-if="full_activities.length > 0">
               <fieldset class="form-group">
                 <div class="row">
@@ -72,8 +88,11 @@ export default {
   data () {
     return {
       selected_event: null,
+      selected_event_wcr: false,
       selected_activity: null,
-      events: [{ value: null, text: 'Please select an event' }],
+      selected_team: null,
+      selected_stage: null,
+      events: [{ value: null, text: 'Please select an event', disabled: true }],
       activities: [],
       full_activities: [],
       backup_activities: [],
@@ -81,7 +100,43 @@ export default {
       submitted: false,
       event_date_str: '',
       loading: true,
-      err_notification: ''
+      err_notification: '',
+      wcr_teams: [
+        { value: null, text: 'Please select a team', disabled: true }, 
+        { value: 'Lliswerry Runners', text: 'Lliswerry Runners'}, 
+        { value: 'Winchester & District AC', text: 'Winchester & District AC'}
+      ],
+      wcr_stages: [
+        { value: null, text: 'Please select a stage', disabled: true },
+        { label: 'Day 1',
+          options: [
+            { value: 1, text: '1 - NOT Caernarfon Castle to Penygroes'},
+            { value: 2, text: '2 - NOT Penygroes to Criccieth Castle'},
+            { value: 3, text: '3 - NOT Criccieth Castle to Maentwrog'},
+            { value: 4, text: '4 - NOT Maentwrog to Harlech Castle'},
+            { value: 5, text: '5 - NOT Harlech Castle to Barmouth'},
+            { value: 6, text: '6 - NOT Barmouth to Dolgellau'},
+            { value: 7, text: '7 - NOT Dolgellau to Dinas Mawddwy'},
+            { value: 8, text: '8 - NOT Dinas Mawddwy to Foel'},
+            { value: 9, text: '9 - NOT Foel to  Llanfair Caereinion'},
+            { value: 10, text: '10 - NOT Llanfair Caereinion to Newtown'}
+          ]
+        },
+        { label: 'Day 2',
+          options: [
+            { value: 11, text: '11 - NOT Newtown to Llanbadarn Fynydd'},
+            { value: 12, text: '12 - NOT Llanbadarn Fynydd to Crossgates'},
+            { value: 13, text: '13 - NOT Crossgates to Builth Wells'},
+            { value: 14, text: '14 - NOT Builth Wells to Drovers Arms'},
+            { value: 15, text: '15 - NOT Epynt Visitor Centre to Brecon'},
+            { value: 16, text: '16 - NOT Brecon to Torpantau'},
+            { value: 17, text: '17 - NOT Taf Fechan Railway Station to Cyfarthfa Castle'},
+            { value: 18, text: '18 - NOT Merthyr Tydfil to Abercynon'},
+            { value: 19, text: '19 - NOT Abercynon to Nantgarw'},
+            { value: 20, text: '20 - NOT Caerphilly Castle to Cardiff Castle'}
+          ]
+        }
+      ]
     }
   },
   mounted() {
@@ -90,11 +145,18 @@ export default {
   watch: {
     selected_event: function() {
       let e = this.full_events[this.selected_event]
+      if (Object.keys(e).indexOf('wcr_event') > -1) {
+        this.selected_event_wcr = e.wcr_event
+      } else {
+        this.selected_event_wcr = false
+      }
+      
       let start = new Date(e.start_time)
       let end = new Date(e.end_time)
       this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
       this.filterActivities(e)
       this.err_notification = '' 
+
     },
     selected_activity: function() {
       this.err_notification = ''
@@ -174,7 +236,11 @@ export default {
       this.full_activities = new_full_activities
     },
     handleDuplicateSubmitError() {
-      this.err_notification = 'You have already submitted this activity for this event. Please choose another activity.'
+      if (this.selected_event_wcr) {
+        this.err_notification = 'You have already submitted this activity for this team and stage. Please choose another activity, team or stage.'
+      } else {
+        this.err_notification = 'You have already submitted this activity for this event. Please choose another activity.'
+      }
     },
     handleGenericSubmitError() {
       this.err_notification = 'Error submitting results. Please contact Dan Cunnington.'
@@ -194,7 +260,14 @@ export default {
         "elapsed_time": selected_acc.elapsed_time,
         "moving_time": selected_acc.moving_time,
         "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281).toString(),
-        "distance": (selected_acc.distance / 1609).toFixed(2)
+        "distance": (selected_acc.distance / 1609).toFixed(2),
+        "wcr": false
+      }
+      // Add team and stage in for WCR
+      if (this.selected_event_wcr) {
+        new_result.wcr = true
+        new_result.wcr_team = this.selected_team
+        new_result.wcr_stage = this.selected_stage
       }
       if (new_result.elapsed_time && new_result.moving_time && new_result.distance) {
         API.submitResult(new_result).then(response => {

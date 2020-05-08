@@ -20,6 +20,16 @@
                 <b-form-datepicker id="end-datepicker" v-model="ev_end_date" :state="end_state" class="mb-2"></b-form-datepicker>
             </div>
         </div>
+        <div class="form-group row">
+            <label for="wcr-check" class="col-sm-3 col-form-label">Welsh Castles Event?</label>
+            <div class="col-sm-9">
+              <b-form-checkbox
+                id="wcr-check"
+                v-model="wcr_event"
+                name="wcr-check"
+              ></b-form-checkbox>
+            </div>
+        </div>
      </form>
   </div>
 </template>
@@ -34,11 +44,12 @@ export default {
   },
   data () {
     return {
-      ev_name: '',
+      ev_name: null,
       ev_start_date: null,
       ev_end_date: null,
       start_state: null,
       end_state: null,
+      wcr_event: false,
       notification: ''
     }
   },
@@ -63,10 +74,18 @@ export default {
         this.ev_name = this.existing.ev_name
         this.ev_start_date = this.existing.ev_start_date
         this.ev_end_date = this.existing.ev_end_date
+        this.wcr_event = this.existing.ev_wcr
       }
     },
     validateEvent() {
       return new Promise((resolve, reject) => {
+        if (!this.ev_name) {
+          this.notification = 'Please select an event name'
+            setTimeout(() => {
+                this.notification = ''
+            }, 2000)
+            reject()
+        }
         if (!this.ev_start_date) {
             this.notification = 'Please select an event start date'
             this.start_state = false
@@ -91,7 +110,8 @@ export default {
         let new_event = {
             "name": this.ev_name,
             "start_time": start_date,
-            "end_time": end_date
+            "end_time": end_date,
+            "wcr_event": this.wcr_event
         }
         resolve(new_event)
       })
@@ -99,9 +119,6 @@ export default {
     createEvent() {
       return new Promise((resolve, reject) => {
         this.validateEvent().then(new_event => {
-          this.ev_name = ''
-          this.ev_start_date = ''
-          this.ev_end_date = ''
           API.newEvent(new_event).then(response => {
               if (Object.keys(response).indexOf('err') > -1) {
                   console.log(response.err)
@@ -114,8 +131,13 @@ export default {
                   // setTimeout(() => {
                   //     this.notification = ''
                   // }, 2000)
+                  this.ev_name = ''
+                  this.ev_start_date = ''
+                  this.ev_end_date = ''
                   resolve(new_event)
               }
+          }, err => {
+            console.log(err.data)
           })
         }, err => {
           // modal will still show and errors populated from validation
@@ -125,9 +147,6 @@ export default {
     editEvent() {
       return new Promise((resolve, reject) => {
         this.validateEvent().then(new_event => {
-          this.ev_name = ''
-          this.ev_start_date = ''
-          this.ev_end_date = ''
           API.editEvent(this.existing.ev_id, new_event).then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
                 console.log(response.err)
@@ -136,6 +155,9 @@ export default {
                     this.notification = ''
                 }, 2000)
             } else {
+                this.ev_name = ''
+                this.ev_start_date = ''
+                this.ev_end_date = ''
                 resolve(new_event)
             }
           }, err => {
