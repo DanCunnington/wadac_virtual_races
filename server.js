@@ -6,76 +6,49 @@ const cors = require('cors')
 const strava = require('strava-v3')
 const path = require('path')
 const cfenv = require("cfenv");
+const bodyParser = require('body-parser')
+const MongoClient = require('mongodb').MongoClient;
 
+// Connect to Mongo and terminate if failed.
+let db_name = ''
+if (process.env.NODE_ENV == 'production') {
+	db_name = process.env.MONGODB_DB_NAME_PROD
+} else {
+	db_name = process.env.MONGODB_DB_NAME_DEV
 
-app.use(cors())
+}
+const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@dan-mrvd9.mongodb.net/${db_name}?retryWrites=true&w=majority`
+const mongo_client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+mongo_client.connect(err => {
+	if (err) {
+		console.log(err)
+		mongo_client.close();
+		process.exit(0)
+	} 
+	console.log('Connected to mongodb.')
+	const db = mongo_client.db(db_name);
 
-strava.config({
-  "client_id"     : process.env.CLIENT_ID,
-  "client_secret" : process.env.CLIENT_SECRET,
-  "redirect_uri"  : "https://localhost:3000",
+	// Setup app
+	app.use(cors())
+	app.use(bodyParser.json())
+
+	strava.config({
+	  "client_id"     : process.env.STRAVA_CLIENT_ID,
+	  "client_secret" : process.env.STRAVA_CLIENT_SECRET,
+	  "redirect_uri"  : "https://localhost:3000",
+	});
+
+	app.use('/', express.static(path.join(__dirname, 'ui')))
+	app.use('/admin', express.static(path.join(__dirname, 'ui')))
+
+	// Routes
+	require('./routes/auth.js')(app, db, strava)
+	require('./routes/events.js')(app, db)
+	require('./routes/results.js')(app, db)
+	require('./routes/athletes.js')(app, db, strava)
+
+	// Start server
+	app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
 });
 
-app.use('/', express.static(path.join(__dirname, 'ui')))
 
-app.get('/get_client_id', (req, res) => {
-	res.json({"client_id": process.env.CLIENT_ID})
-})
-
-app.get('/get_access_token', (req, res) => {
-	strava.oauth.getToken(req.query.code, (err, result, body) => {
-		if (err) {
-			console.log(err)
-			res.status(401)
-			return res.json({"err": err})
-		}
-		access_token = body.access_token
-		expires_at = body.expires_at
-		refresh_token = body.refresh_token
-		user_name = body.athlete.firstname + ' ' + body.athlete.lastname
-		res.json({access_token, refresh_token, expires_at, user_name})
-	})
-})
-
-app.get('/refresh_access_token', (req, res) => {
-	let refresh_token = req.query.refresh_token
-	strava.oauth.refreshToken(refresh_token).then((body) => {
-		access_token = body.access_token
-		expires_at = body.expires_at
-		refresh_token = body.refresh_token
-		res.json({access_token, refresh_token, expires_at})
-	})
-})
-
-app.get('/get_results', (req, res) => {
-	let access_token = req.query.access_token
-	let event_name = req.query.event_name
-
-	//Get all activities for club
-	strava.clubs.listActivities({"access_token": access_token, "id": process.env.CLUB_ID, "per_page": 200}, (err, result) => {
-		if (err) {
-			console.log(err)
-			res.status(500)
-			return res.json({"err": err})
-		}
-		event_activities = []
-		
-		let headers = ['athlete','activity','distance (miles)', 'moving time (seconds)', 'elevation gain (ft)']
-		result.forEach(activity => {
-			if (activity.name.includes(event_name)) {
-				athlete_name = activity.athlete.firstname +' '+activity.athlete.lastname
-				activity_name = activity.name.split(',').join(' ')
-				distance_miles = activity.distance / 1609
-				moving_time = activity.moving_time
-				elev_gain = activity.total_elevation_gain*3.281
-
-				event_activities.push({
-					athlete_name, activity_name, distance_miles, moving_time, elev_gain
-				})
-			}
-		})
-		res.json({"headers": headers, "results": event_activities})
-	})
-})
-
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Admin from '../views/Admin.vue'
 
 Vue.use(VueRouter)
 
@@ -8,17 +9,21 @@ Vue.use(VueRouter)
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: Home,
+    meta: {
+      title: 'WADAC Virtual Racing'
+    }
   },
   {
-    path: '/about',
-    name: 'About',
+    path: '/admin',
+    name: 'Admin',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: function () {
-      return import(/* webpackChunkName: "about" */ '../views/About.vue')
-    }
+    //component: function () {
+    //  return import(/* webpackChunkName: "about" */ '../views/Admin.vue')
+    //}
+    component: Admin
   }
 ]
 
