@@ -101,42 +101,8 @@ export default {
       event_date_str: '',
       loading: true,
       err_notification: '',
-      wcr_teams: [
-        { value: null, text: 'Please select a team', disabled: true }, 
-        { value: 'Lliswerry Runners', text: 'Lliswerry Runners'}, 
-        { value: 'Winchester & District AC', text: 'Winchester & District AC'}
-      ],
-      wcr_stages: [
-        { value: null, text: 'Please select a stage', disabled: true },
-        { label: 'Day 1',
-          options: [
-            { value: 1, text: '1 - NOT Caernarfon Castle to Penygroes'},
-            { value: 2, text: '2 - NOT Penygroes to Criccieth Castle'},
-            { value: 3, text: '3 - NOT Criccieth Castle to Maentwrog'},
-            { value: 4, text: '4 - NOT Maentwrog to Harlech Castle'},
-            { value: 5, text: '5 - NOT Harlech Castle to Barmouth'},
-            { value: 6, text: '6 - NOT Barmouth to Dolgellau'},
-            { value: 7, text: '7 - NOT Dolgellau to Dinas Mawddwy'},
-            { value: 8, text: '8 - NOT Dinas Mawddwy to Foel'},
-            { value: 9, text: '9 - NOT Foel to  Llanfair Caereinion'},
-            { value: 10, text: '10 - NOT Llanfair Caereinion to Newtown'}
-          ]
-        },
-        { label: 'Day 2',
-          options: [
-            { value: 11, text: '11 - NOT Newtown to Llanbadarn Fynydd'},
-            { value: 12, text: '12 - NOT Llanbadarn Fynydd to Crossgates'},
-            { value: 13, text: '13 - NOT Crossgates to Builth Wells'},
-            { value: 14, text: '14 - NOT Builth Wells to Drovers Arms'},
-            { value: 15, text: '15 - NOT Epynt Visitor Centre to Brecon'},
-            { value: 16, text: '16 - NOT Brecon to Torpantau'},
-            { value: 17, text: '17 - NOT Taf Fechan Railway Station to Cyfarthfa Castle'},
-            { value: 18, text: '18 - NOT Merthyr Tydfil to Abercynon'},
-            { value: 19, text: '19 - NOT Abercynon to Nantgarw'},
-            { value: 20, text: '20 - NOT Caerphilly Castle to Cardiff Castle'}
-          ]
-        }
-      ]
+      wcr_teams: [],
+      wcr_stages: []
     }
   },
   mounted() {
@@ -164,6 +130,10 @@ export default {
   },
   methods: {
     initialise() {
+      // Load WCR Data
+      this.wcr_teams = API.getWCRTeams()
+      this.wcr_stages = API.getWCRStages()
+      
       // Get active events
       this.getActiveEvents().then(_ => {
         // Get activities

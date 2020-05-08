@@ -21,9 +21,16 @@
       <div class="text-left">
 
         <!-- Modals -->
-        <b-button v-b-modal.modal-1 class="pull-left" variant="primary" @click="resetModalText">Create Event</b-button>
+        <div class="admin-btn-container">
+          <b-button v-b-modal.modal-1 class="pull-left" variant="primary" @click="resetModalText">Create Event</b-button>
+          <b-button v-b-modal.modal-2 class="pull-left mr-btn" variant="outline-primary" @click="">Manual Result Submission</b-button>
+        </div>
         <b-modal id="modal-1" :ok-title="create_or_edit_button" :title="create_or_edit_title" @ok="handleOk">
           <EventModal ref="event_modal" :existing="existing"></EventModal>
+        </b-modal>
+
+        <b-modal id="modal-2" :ok-title="'Submit'" :title="'Manual Result Submission'" @ok="handleManualResultOk">
+          <ManualResultModal ref="mr_modal"></ManualResultModal>
         </b-modal>
 
         <b-modal id="delete-modal" :title="modal_delete_title" @ok="handleDelete">
@@ -94,13 +101,15 @@
 import API from '../../services/api.js'
 import EventModal from './EventModal.vue'
 import ResultsModal from './ResultsModal.vue'
+import ManualResultModal from './ManualResultModal.vue'
 
 export default {
   name: 'AdminMain',
   props: [],
   components: {
     EventModal,
-    ResultsModal
+    ResultsModal,
+    ManualResultModal
   },
   data () {
     return {
@@ -148,6 +157,15 @@ export default {
       this.create_or_edit_title = 'Create Event'
       this.create_or_edit_button = 'Create'
       this.existing = null
+    },
+    handleManualResultOk(bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.$refs.mr_modal.submitManualResult().then(_ => {
+        // Hide the modal manually
+        this.$nextTick(() => {
+          this.$bvModal.hide('modal-2')
+        })
+      })
     },
     handleOk(bvModalEvt) {
       // Prevent modal from closing
@@ -399,6 +417,10 @@ export default {
     display: inline-flex;
     width: 100%;
     justify-content: space-evenly;
+  }
+
+  .mr-btn {
+    margin-left: 1em;
   }
 
   /*div.modal.results-modal .modal-dialog {
