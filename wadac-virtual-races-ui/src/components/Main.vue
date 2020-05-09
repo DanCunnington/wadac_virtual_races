@@ -1,8 +1,8 @@
 <template>
   <div class="hello">
+    <h1>WADAC Virtual Racing</h1>
     <div class="content">
-      <h1>WADAC Virtual Racing</h1>
-      <p class="welcome" v-if="!cookie.access_token">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
+      <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
 
       <div v-if="!manual_submission_submitted" class="submission-container">
         <div class="strava-option">
@@ -30,9 +30,8 @@
         </div>
       </div>
       <div v-else>
-        <p>Thank you, your manual result submission has been saved.</p>
+        <p class="manual-ok">Thank you, your manual result submission has been saved.</p>
       </div>
-      <p class="footer">If you experience any problems using this service, please contact <a class="mailto" href="mailto:dancunnington@hotmail.co.uk">Dan Cunnington</a>.</p>
     </div>
   </div>
 </template>
@@ -120,6 +119,7 @@ export default {
       this.$cookie.delete('wadac_virtual_races');
       // Route to homepage
       let query_params = this.$route.query
+      this.loading = false
       if (query_params && Object.keys(query_params).indexOf('code') > -1 && 
         Object.keys(query_params).indexOf('scope') > -1) {
         this.$router.push('/') 
@@ -167,6 +167,7 @@ export default {
           }
           this.$cookie.set('wadac_virtual_races', JSON.stringify(cookie), 30)
           this.cookie = cookie
+          this.loading = false
           this.$router.push('/') 
         }
       }, err => {
@@ -198,6 +199,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.hello {
+  padding-bottom: 30px;
+}
 h3 {
   margin: 40px 0 0;
 }
@@ -226,7 +230,7 @@ button:disabled {
 .content {
   margin-top: 40px;
   margin: 0 auto;
-  max-width: 500px;
+  max-width: 520px;
 }
 
 h1.hover-cursor {
@@ -269,16 +273,12 @@ p.submit-instructions {
   margin-bottom: 40px;
 }
 
-span.manual-upload, a.mailto {
+span.manual-upload {
   color: blue !important;
 }
 
-p.footer {
-  position: absolute;
-  bottom: 0;
-  margin-bottom: 30px;
+p.manual-ok {
   text-align: center;
-  font-size: smaller;
 }
 
 
