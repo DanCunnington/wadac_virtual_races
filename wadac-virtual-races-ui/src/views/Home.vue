@@ -2,7 +2,7 @@
   <div class="home">
     <Main/>
     <p class="footer">
-  	If you experience any problems using this service, please contact <a class="mailto" href="mailto:dancunnington@hotmail.co.uk">Dan Cunnington</a>.
+  	If you experience any problems, please contact <a class="mailto" href="mailto:dancunnington@hotmail.co.uk">Dan Cunnington</a>.
   	</p>
   </div>
 
