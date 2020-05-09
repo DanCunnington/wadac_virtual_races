@@ -4,6 +4,8 @@ module.exports = (app, db) => {
 		let event_name = req.body.name
 		let start_time = req.body.start_time
 		let end_time = req.body.end_time
+		let distance = req.body.distance
+		let elevation_gain = req.body.elevation_gain
 		let wcr_event = false
 		if (Object.keys(req.body).indexOf('wcr_event') > -1) {
 			wcr_event = req.body.wcr_event
@@ -14,8 +16,17 @@ module.exports = (app, db) => {
 			return res.json({"err": "please specify event_name, start_time and end_time and ensure end_time is after start_time."})
 		}
 
+		if (!wcr_event && (!distance || !elevation_gain)) {
+			res.status(400)
+			return res.json({"err": "please specify distance and elevation gain for non welsh castles events."})
+		}
+
 		// Insert to database
 		let event = {event_name, start_time, end_time, wcr_event}
+		if (!wcr_event) {
+			event.distance = distance
+			event.elevation_gain = elevation_gain
+		}
 		db.collection('events').insertOne(event, (err, result) => {
 			if (err) {
 				res.status(500)

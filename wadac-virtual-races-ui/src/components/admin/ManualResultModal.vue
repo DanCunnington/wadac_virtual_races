@@ -5,13 +5,13 @@
         <div class="form-group row">
           <label for="name" class="col-sm-4 col-form-label">Athlete Name</label>
           <div class="col-sm-8">
-            <input type="text" class="form-control" id="name" v-model="athlete_name" required>
+            <b-form-input id="name" :state="name_state" v-model="athlete_name"></b-form-input>
           </div>
         </div>
         <div class="form-group row">
           <label for="event" class="col-sm-4 col-form-label">Event</label>
           <div class="col-sm-8">
-            <b-form-select v-model="selected_event" :options="events" required></b-form-select>
+            <b-form-select v-model="selected_event" :options="events" :state="event_state" required></b-form-select>
           </div>
         </div>
         <div class="form-group row" v-if="selected_event != null">
@@ -26,13 +26,13 @@
             <div class="form-group row">
               <label for="wcr-team" class="col-sm-4 col-form-label">Team</label>
               <div class="col-sm-8">
-                <b-form-select v-model="selected_team" :options="wcr_teams" default="Please select a team" required></b-form-select>
+                <b-form-select v-model="selected_team" :options="wcr_teams" :state="team_state" default="Please select a team" required></b-form-select>
               </div>
             </div>
             <div class="form-group row">
               <label for="wcr-stage" class="col-sm-4 col-form-label">Stage</label>
               <div class="col-sm-8">
-                <b-form-select v-model="selected_stage" :options="wcr_stages" required></b-form-select>
+                <b-form-select v-model="selected_stage" :options="wcr_stages" :state="stage_state" required></b-form-select>
               </div>
             </div>
           </div>
@@ -43,15 +43,15 @@
             <label for="elapsed_time" class="col-sm-4 col-form-label">Elapsed Time</label>
             <div class="hms-container col-sm-8">
               <div class="hms-inner">
-                <input type="text" class="form-control" id="elapsed_time_h" v-model="elapsed_time_h" required>
+                <b-form-input id="elapsed_time_h" v-model="elapsed_time_h"></b-form-input>
                 <div class="hms-units">hrs</div>
               </div>
               <div class="hms-inner">
-                <input type="text" class="form-control" id="elapsed_time_m" v-model="elapsed_time_m" required>
+                <b-form-input id="elapsed_time_m" v-model="elapsed_time_m"></b-form-input>
                 <div class="hms-units">mins</div>
               </div>
               <div class="hms-inner">
-                <input type="text" class="form-control" id="elapsed_time_s" v-model="elapsed_time_s" required>
+                <b-form-input id="elapsed_time_s" v-model="elapsed_time_s"></b-form-input>
                 <div class="hms-units">secs</div>
               </div>
             </div>
@@ -61,15 +61,15 @@
             <label for="elapsed_time" class="col-sm-4 col-form-label">Moving Time</label>
             <div class="hms-container col-sm-8">
               <div class="hms-inner">
-                <input type="text" class="form-control" id="moving_time_h" v-model="moving_time_h" required>
+                <b-form-input id="moving_time_h" v-model="moving_time_h"></b-form-input>
                 <div class="hms-units">hrs</div>
               </div>
               <div class="hms-inner">
-                <input type="text" class="form-control" id="moving_time_m" v-model="moving_time_m" required>
+                <b-form-input id="moving_time_m" v-model="moving_time_m"></b-form-input>
                 <div class="hms-units">mins</div>
               </div>
               <div class="hms-inner">
-                <input type="text" class="form-control" id="moving_time_s" v-model="moving_time_s" required>
+                <b-form-input id="moving_time_s" v-model="moving_time_s"></b-form-input>
                 <div class="hms-units">secs</div>
               </div>
             </div>
@@ -78,14 +78,14 @@
           <div class="form-group row">
             <label for="distance" class="col-sm-4 col-form-label">Distance (mi)</label>
             <div class="col-sm-8">
-              <input type="text" class="form-control" id="distance" v-model="distance" required>
+              <b-form-input id="distance" :state="distance_state" v-model="distance"></b-form-input>
             </div>
           </div>
 
           <div class="form-group row">
             <label for="elevation_gain" class="col-sm-4 col-form-label">Elevation Gain (ft)</label>
             <div class="col-sm-8">
-              <input type="text" class="form-control" id="elevation_gain" v-model="elevation_gain" required>
+              <b-form-input id="elevation_gain" :state="eg_state" v-model="elevation_gain"></b-form-input>
             </div>
           </div>
 
@@ -124,26 +124,60 @@ export default {
       moving_time_s: 0,
       moving_time: null,
       distance: null,
-      elevation_gain: null
+      elevation_gain: null,
+      name_state: null,
+      event_state: null,
+      team_state: null,
+      stage_state: null,
+      distance_state: null,
+      eg_state: null
     }
   },
   mounted() {
     this.initialise()
   },
   watch: {
-    selected_event: function() {
-      let e = this.full_events[this.selected_event]
-      if (Object.keys(e).indexOf('wcr_event') > -1) {
-        this.selected_event_wcr = e.wcr_event
-      } else {
-        this.selected_event_wcr = false
+    athlete_name: function(val) {
+      if (val) {
+        this.name_state = null
       }
-      
-      let start = new Date(e.start_time)
-      let end = new Date(e.end_time)
-      this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
-      this.err_notification = '' 
     },
+    selected_event: function() {
+      if (this.selected_event) {
+        this.event_state = null
+        let e = this.full_events[this.selected_event]
+        if (Object.keys(e).indexOf('wcr_event') > -1) {
+          this.selected_event_wcr = e.wcr_event
+        } else {
+          this.selected_event_wcr = false
+        }
+        
+        let start = new Date(e.start_time)
+        let end = new Date(e.end_time)
+        this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
+        this.err_notification = '' 
+      }
+    },
+    selected_team: function(val) {
+      if (val) {
+        this.team_state = null
+      }
+    },
+    selected_stage: function(val) {
+      if (val) {
+        this.stage_state = null
+      }
+    },
+    distance: function(val) {
+      if (val) {
+        this.distance_state = null
+      }
+    },
+    elevation_gain: function(val) {
+      if (val) {
+        this.eg_state = null
+      }
+    }
   },
   methods: {
     initialise() {
@@ -170,6 +204,14 @@ export default {
         })
       })
     },
+    checkET() {
+      let elapsed_time = (3600*this.elapsed_time_h) + (60*this.elapsed_time_m) + this.elapsed_time_s
+      return (elapsed_time > 0)
+    },
+    checkMT() {
+      let moving_time = (3600*this.moving_time_h) + (60*this.moving_time_m) + this.moving_time_s
+      return (moving_time > 0)
+    },
 
     handleGenericSubmitError() {
       this.err_notification = 'Error submitting result. Please contact Dan Cunnington.'
@@ -178,6 +220,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (!this.athlete_name) {
           this.err_notification = 'Please enter an athlete name'
+          this.name_state = false
             setTimeout(() => {
                 this.err_notification = ''
             }, 2000)
@@ -186,6 +229,7 @@ export default {
 
         if (this.selected_event == null) {
           this.err_notification = 'Please select an event'
+          this.event_state = false
             setTimeout(() => {
                 this.err_notification = ''
             }, 2000)
@@ -195,6 +239,7 @@ export default {
         if (this.selected_event_wcr) {
           if (!this.selected_team) {
             this.err_notification = 'Please select a team'
+            this.team_state = false
               setTimeout(() => {
                   this.err_notification = ''
               }, 2000)
@@ -203,6 +248,7 @@ export default {
 
           if (!this.selected_stage) {
             this.err_notification = 'Please select a stage'
+            this.stage_state = false
               setTimeout(() => {
                   this.err_notification = ''
               }, 2000)
@@ -231,6 +277,7 @@ export default {
 
         if (!this.distance) {
           this.err_notification = 'Please enter distance in miles'
+          this.distance_state = false
             setTimeout(() => {
                 this.err_notification = ''
             }, 2000)
@@ -239,6 +286,7 @@ export default {
 
         if (!this.elevation_gain) {
           this.err_notification = 'Please enter elevation gain in feet'
+          this.eg_state = false
             setTimeout(() => {
                 this.err_notification = ''
             }, 2000)
@@ -335,7 +383,7 @@ export default {
   }
 
   p.notification {
-    color: red;
+    color: #dc3545;;
   }
 
   p.event_dates {

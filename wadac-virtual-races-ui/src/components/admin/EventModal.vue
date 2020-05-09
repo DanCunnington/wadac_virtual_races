@@ -5,7 +5,7 @@
         <div class="form-group row">
           <label for="name" class="col-sm-3 col-form-label">Name</label>
           <div class="col-sm-9">
-            <input type="text" class="form-control" id="name" v-model="ev_name" required>
+            <b-form-input id="name" :state="name_state" v-model="ev_name"></b-form-input>
           </div>
         </div>
         <div class="form-group row">
@@ -21,14 +21,30 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="wcr-check" class="col-sm-3 col-form-label">Welsh Castles Event?</label>
-            <div class="col-sm-9">
+            <label for="wcr-check" class="col-sm-5 col-form-label">Welsh Castles Event?</label>
+            <div class="col-sm-4 wcr-switch">
               <b-form-checkbox
                 id="wcr-check"
                 v-model="wcr_event"
                 name="wcr-check"
+                switch
+                size="lg"
               ></b-form-checkbox>
             </div>
+        </div>
+        <div v-if="!wcr_event">
+          <div class="form-group row">
+            <label for="distance" class="col-sm-6 col-form-label">Event Distance (mi)</label>
+            <div class="col-sm-6">
+              <b-form-input id="distance" :state="distance_state" v-model="ev_distance"></b-form-input>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="elevation_gain" class="col-sm-6 col-form-label">Event Elevation Gain (ft)</label>
+            <div class="col-sm-6">
+              <b-form-input id="elevation_gain" :state="eg_state" v-model="ev_elevation_gain"></b-form-input>
+            </div>
+          </div>
         </div>
      </form>
   </div>
@@ -47,8 +63,13 @@ export default {
       ev_name: null,
       ev_start_date: null,
       ev_end_date: null,
+      ev_distance: null,
+      ev_elevation_gain: null,
       start_state: null,
       end_state: null,
+      name_state: null,
+      distance_state: null,
+      eg_state: null,
       wcr_event: false,
       notification: ''
     }
@@ -57,6 +78,11 @@ export default {
     this.initialise()
   },
   watch: {
+    ev_name: function(val) {
+      if (val) {
+        this.name_state = null
+      }
+    },
     ev_start_date: function(val) {
         if (val) {
             this.start_state = null
@@ -66,6 +92,16 @@ export default {
         if (val) {
             this.end_state = null
         }
+    },
+    ev_distance: function(val) {
+      if (val) {
+        this.distance_state = null
+      }
+    },
+    ev_elevation_gain: function(val) {
+      if (val) {
+        this.eg_state = null
+      }
     }
   },
   methods: {
@@ -80,11 +116,12 @@ export default {
     validateEvent() {
       return new Promise((resolve, reject) => {
         if (!this.ev_name) {
-          this.notification = 'Please select an event name'
+          this.notification = 'Please enter an event name'
+          this.name_state = false
             setTimeout(() => {
                 this.notification = ''
             }, 2000)
-            reject()
+            return reject()
         }
         if (!this.ev_start_date) {
             this.notification = 'Please select an event start date'
@@ -92,7 +129,7 @@ export default {
             setTimeout(() => {
                 this.notification = ''
             }, 2000)
-            reject()
+            return reject()
         }
         if (!this.ev_end_date) {
             this.notification = 'Please select an event end date'
@@ -100,8 +137,39 @@ export default {
             setTimeout(() => {
                 this.notification = ''
             }, 2000)
-            reject()
+            return reject()
         }
+
+        if (this.ev_end_date <= this.ev_start_date) {
+          this.notification = 'Please ensure the event end date is after the start date'
+          this.end_state = false
+          setTimeout(() => {
+              this.notification = ''
+          }, 2000)
+          return reject()
+        }
+
+        if (!this.wcr_event) {
+          if (!this.ev_distance) {
+            this.notification = 'Please enter an event distance in miles'
+            this.distance_state = false
+            setTimeout(() => {
+                this.notification = ''
+            }, 2000)
+            return reject()
+          }
+
+          if (!this.ev_elevation_gain) {
+            this.notification = 'Please enter an event elevation gain in feet'
+            this.eg_state = false
+            setTimeout(() => {
+                this.notification = ''
+            }, 2000)
+            return reject()
+          }
+        }
+
+
         let picked_start = this.ev_start_date.split('-')
         let picked_end = this.ev_end_date.split('-')
         let start_date = new Date(parseInt(picked_start[0]), parseInt(picked_start[1])-1, parseInt(picked_start[2])).getTime()
@@ -112,6 +180,11 @@ export default {
             "start_time": start_date,
             "end_time": end_date,
             "wcr_event": this.wcr_event
+        }
+
+        if (!this.wcr_event) {
+          new_event.distance = this.ev_distance
+          new_event.elevation_gain = this.ev_elevation_gain
         }
         resolve(new_event)
       })
@@ -190,6 +263,14 @@ export default {
 
   h1.hover-cursor {
     cursor: pointer
+  }
+
+  .wcr-switch {
+    margin-top: 4px;
+  }
+
+  .notification {
+    color: #dc3545;
   }
 </style>
 

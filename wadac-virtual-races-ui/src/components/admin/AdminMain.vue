@@ -47,7 +47,10 @@
 
         
         <b-modal id="results-modal" class="results-modal" size="full" :title="modal_results_title">
-          <ResultsModal ref="results_modal" :wcr="modal_results_wcr" :preview_results_set="preview_results_set"></ResultsModal>
+          <ResultsModal ref="results_modal" :wcr="modal_results_wcr" 
+          :ref_distance="selected_ev_ref_distance" 
+          :ref_elevation_gain="selected_ev_ref_elev_gain"
+          :preview_results_set="preview_results_set"></ResultsModal>
           <template v-slot:modal-footer="{ hide }">
             <b-button variant="outline-secondary" @click="hide()">
               Close
@@ -113,7 +116,7 @@ export default {
   },
   data () {
     return {
-      logged_in: true,
+      logged_in: false,
       password: '',
       events: [],
       fields: [
@@ -134,7 +137,9 @@ export default {
       event_to_delete: '',
       preview_results_set: [],
       modal_results_title: '',
-      modal_results_wcr: false
+      modal_results_wcr: false,
+      selected_ev_ref_distance: false,
+      selected_ev_ref_elev_gain: false
     }
   },
   mounted() {
@@ -245,6 +250,8 @@ export default {
         "results": '',
         "controls": "",
         "wcr_event": wcr_event,
+        "distance": e.distance,
+        "elevation_gain": e.elevation_gain,
         "id": e._id,
       })
     },
@@ -307,6 +314,8 @@ export default {
           let name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
           this.modal_results_title = `${name} Results Preview`
           this.modal_results_wcr = item.wcr_event
+          this.selected_ev_ref_distance = item.distance
+          this.selected_ev_ref_elev_gain = item.elevation_gain
           this.$nextTick(() => {
             this.$bvModal.show('results-modal')
           })
@@ -320,12 +329,18 @@ export default {
         } else {
           console.log(response.data)
           let wcr_event = item.wcr_event
+          let distance = item.distance
+          let elevation_gain = item.elevation_gain
           let headers = []
           if (wcr_event) {
             headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft', 
             'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds']
 
+          } else if (distance && elevation_gain) {
+            headers = ['start_date', 'athlete_name', 'activity_name', 
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds']
           } else {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
@@ -352,6 +367,18 @@ export default {
 
               tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
                 activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
+                ref_dist, ref_elev, adj_time])
+
+            } else if (distance && elevation_gain) {
+              // Adjust time to match event
+              let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(r['distance']), 
+                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
+              let adj_time = adj_obj['adj_time']
+              let ref_dist = adj_obj['ref_distance']
+              let ref_elev = adj_obj['ref_elevation_gain']
+
+              tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
+                r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
                 ref_dist, ref_elev, adj_time])
             } else {
               tmp_csv.push([start_date, r['athlete_name'], activity_name, 

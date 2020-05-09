@@ -126,6 +126,13 @@ export default {
             }
         ]
     },
+    calculateAdjustedTime(ref_distance, ref_elevation_gain, recorded_distance, recorded_time, recorded_elevation_gain) {
+        let dist_factor = recorded_distance / ref_distance
+        let adj_distance = recorded_time / dist_factor
+        let adj_elev = Math.pow((ref_elevation_gain / (recorded_elevation_gain / dist_factor)),0.05)
+        let adj_time = parseInt(adj_distance * adj_elev)
+        return {adj_time, ref_distance, ref_elevation_gain}
+    },
     calculateAdjustedWCRTime(stage, recorded_distance, recorded_time, recorded_elevation_gain) {
         let stageInfo = this.getWCRStages()
         let dayOne = stageInfo[1].options
@@ -151,12 +158,7 @@ export default {
         if (!ref_distance || !ref_elevation_gain) {
             return false
         } else {
-            let dist_factor = recorded_distance / ref_distance
-            let adj_distance = recorded_time / dist_factor
-            let adj_elev = Math.pow((ref_elevation_gain / (recorded_elevation_gain / dist_factor)),0.05)
-            let adj_time = parseInt(adj_distance * adj_elev)
-
-            return {adj_time, ref_distance, ref_elevation_gain}
+            return this.calculateAdjustedTime(ref_distance, ref_elevation_gain, recorded_distance, recorded_time, recorded_elevation_gain)
         }
     }
 }

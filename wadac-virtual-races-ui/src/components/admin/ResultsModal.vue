@@ -16,7 +16,7 @@
 import API from '../../services/api.js'
 export default {
   name: 'ResultsModal',
-  props: [ 'preview_results_set', 'wcr'],
+  props: [ 'preview_results_set', 'wcr', 'ref_distance', 'ref_elevation_gain'],
   components: {
     
   },
@@ -33,7 +33,6 @@ export default {
   },
   methods: {
     initialise() {
-      console.log(this.preview_results_set)
       this.fields = [
         {"key": "start_date", "sortable": false},
         {"key": "athlete_name", "sortable": false}
@@ -48,7 +47,24 @@ export default {
       this.fields.push({"key": "elevation_gain", "label": "Elevation Gain (ft)", "sortable": false})
       this.fields.push({"key": "distance", "label": "Distance (mi)", "sortable": false})
 
-      if (this.wcr) {
+      if (this.ref_distance && this.ref_elevation_gain) {
+        this.fields.push({"key": "ref_distance", "label": "Event Reference Distance (mi)", "sortable": false})
+        this.fields.push({"key": "ref_elevation_gain", "label": "Event Reference Elevation Gain (ft)", "sortable": false})
+        this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false})
+
+        // Adjust time to match WCR stage
+        this.preview_results_set.forEach(r => {
+          let adj_obj = API.calculateAdjustedTime(parseFloat(this.ref_distance), parseFloat(this.ref_elevation_gain), 
+            parseFloat(r['distance']), parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
+          let adj_time = adj_obj['adj_time']
+          let ref_dist = adj_obj['ref_distance']
+          let ref_elev = adj_obj['ref_elevation_gain']
+
+          r.ref_distance = ref_dist
+          r.ref_elevation_gain = ref_elev
+          r.adjusted_time = adj_time
+        })
+      } else if (this.wcr) {
         this.fields.push({"key": "ref_distance", "label": "Stage Reference Distance (mi)", "sortable": false})
         this.fields.push({"key": "ref_elevation_gain", "label": "Stage Reference Elevation Gain (ft)", "sortable": false})
         this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false})
