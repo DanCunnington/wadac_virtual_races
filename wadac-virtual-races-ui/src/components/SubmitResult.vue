@@ -65,7 +65,7 @@
           </div>
         </div>
         <div v-else>
-          <p>Loading...</p>
+          <p>{{loading_str}}</p>
         </div>
       </form>
     </div>
@@ -102,7 +102,8 @@ export default {
       loading: true,
       err_notification: '',
       wcr_teams: [],
-      wcr_stages: []
+      wcr_stages: [],
+      loading_str: 'Loading...'
     }
   },
   mounted() {
@@ -130,14 +131,13 @@ export default {
   },
   methods: {
     initialise() {
-      // Load WCR Data
-      this.wcr_teams = API.getWCRTeams()
-      this.wcr_stages = API.getWCRStages()
-      
       // Get active events
       this.getActiveEvents().then(_ => {
         // Get activities
         this.getAthleteActivities().then(_ => {
+          // Load WCR Data
+          this.wcr_teams = API.getWCRTeams()
+          this.wcr_stages = API.getWCRStages()
           this.loading = false
         })
       })

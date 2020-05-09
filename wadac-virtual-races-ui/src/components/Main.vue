@@ -1,21 +1,45 @@
 <template>
   <div class="hello">
-    <h1>WADAC Virtual Racing</h1>
-    <p v-if="!cookie.access_token">Hi there. Please log in to Strava using the button below. This application requires access to your activities in order to submit a result.</p>
-    <img v-if="!cookie.access_token" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
-    <div v-if="cookie.access_token">
-      <p class="name">Hi, {{cookie.user_name}}!</p>
-      <p class="signout" @click="deauthorise()">Sign out?</p>
+    <div class="content">
+      <h1>WADAC Virtual Racing</h1>
+      <p class="welcome" v-if="!cookie.access_token">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
 
-      <div class="content">
-        <SubmitResult :cookie="cookie"></SubmitResult>
+      <div v-if="!manual_submission_submitted" class="submission-container">
+        <div class="strava-option">
+          <h4 class="welcome-heading" v-if="!cookie.access_token">1) Strava (Easiest)</h4>
+          <p class="submit-instructions" v-if="!cookie.access_token">If you have a Strava account, select from one of your activities using the button below.</p> 
+
+          <p class="submit-instructions strava" v-if="!cookie.access_token">Note: This application requires access to your activities but will only store the activity name, distance, elapsed time, moving time and elevation gain.</p>
+          <img v-if="!cookie.access_token && !loading" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
+          <p v-if="loading">Loading...</p>
+          <div v-if="cookie.access_token">
+            <p class="name">Hi, {{cookie.user_name}}!</p>
+            <p class="signout" @click="deauthorise()">Sign out?</p>
+
+            <SubmitResult :cookie="cookie"></SubmitResult>
+          </div>
+        </div>
+
+        <div class="manual-option" v-if="!cookie.access_token">
+          <b-modal id="manual-upload-modal" :ok-title="'Submit'" :title="'Manual Result Submission'" @ok="handleManualResultOk">
+            <ManualResultModal ref="mr_modal_main" :events_type="'active'"></ManualResultModal>
+          </b-modal>
+
+          <h4 class="welcome-heading">2) Manual Submission</h4>
+          <p class="submit-instructions">Alternatively, if you don't have a Strava account, you can submit your result manually by clicking <span class="manual-upload" @click="manualUpload">here</span>.</p> 
+        </div>
       </div>
+      <div v-else>
+        <p>Thank you, your manual result submission has been saved.</p>
+      </div>
+      <p class="footer">If you experience any problems using this service, please contact <a class="mailto" href="mailto:dancunnington@hotmail.co.uk">Dan Cunnington</a>.</p>
     </div>
   </div>
 </template>
 
 <script>
 import SubmitResult from './SubmitResult.vue'
+import ManualResultModal from './admin/ManualResultModal.vue'
 import API from '../services/api.js'
 
 export default {
@@ -24,7 +48,8 @@ export default {
 
   },
   components: {
-    SubmitResult
+    SubmitResult,
+    ManualResultModal
   },
   data () {
     return {
@@ -34,8 +59,9 @@ export default {
         access_token: false
       },
       event_name: '',
-      isSubmitted: false,
-      results: []
+      manual_submission_submitted: false,
+      results: [],
+      loading: false
     }
   },
   mounted() {
@@ -59,6 +85,7 @@ export default {
         if (cookie && cookie != "undefined") {
           if (!this.cookieExpired(cookie)) {
             this.cookie = cookie
+            this.loading = false
             console.log('exists')
           } else {
             this.refreshAccessToken(cookie)
@@ -68,6 +95,7 @@ export default {
           let query_params = this.$route.query
           if (query_params && Object.keys(query_params).indexOf('code') > -1 &&
             Object.keys(query_params).indexOf('scope') > -1) {
+            this.loading = true
             let code = query_params.code
             let scope = query_params.scope
             if (!scope.includes('activity:read')) {
@@ -119,6 +147,7 @@ export default {
           }
           this.$cookie.set('wadac_virtual_races', JSON.stringify(new_cookie), 30)
           this.cookie = new_cookie
+          this.loading = false
           console.log('refreshed')
         }
       }, err => {
@@ -142,6 +171,25 @@ export default {
         }
       }, err => {
         this.deauthorise()
+      })
+    },
+    manualUpload() {
+      this.$nextTick(() => {
+        this.$bvModal.show('manual-upload-modal')
+      })
+    },
+    handleManualResultOk(bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.$refs.mr_modal_main.submitManualResult().then(_ => {
+        this.manual_submission_submitted = true
+        // Hide the modal manually
+        this.$nextTick(() => {
+          this.$bvModal.hide('manual-upload-modal')
+        })
+      })
+      .catch(err => {
+        console.log('problem')
+        console.log(err)
       })
     }
   }
@@ -189,12 +237,49 @@ p.name {
   margin: 0;
 }
 
-p.signout {
+p.signout, span.manual-upload {
   text-decoration: underline;
 }
 
-p.signout:hover {
+p.signout:hover, span.manual-upload:hover {
   cursor: pointer
 }
+
+h4.welcome-heading {
+  text-align: left;
+}
+
+p.welcome {
+  font-size: large;
+  margin-bottom: 30px;
+}
+
+p.strava {
+  font-style: italic;
+  font-size: smaller;
+  margin-bottom: 16px !important;
+}
+
+p.submit-instructions {
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.strava-option {
+  margin-bottom: 40px;
+}
+
+span.manual-upload, a.mailto {
+  color: blue !important;
+}
+
+p.footer {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: smaller;
+}
+
 
 </style>

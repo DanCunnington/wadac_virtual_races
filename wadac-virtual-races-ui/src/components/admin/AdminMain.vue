@@ -30,7 +30,7 @@
         </b-modal>
 
         <b-modal id="modal-2" :ok-title="'Submit'" :title="'Manual Result Submission'" @ok="handleManualResultOk">
-          <ManualResultModal ref="mr_modal"></ManualResultModal>
+          <ManualResultModal ref="mr_modal" :events_type="'all'"></ManualResultModal>
         </b-modal>
 
         <b-modal id="delete-modal" :title="modal_delete_title" @ok="handleDelete">

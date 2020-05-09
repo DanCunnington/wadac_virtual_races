@@ -99,7 +99,7 @@ import API from '../../services/api.js'
 
 export default {
   name: 'ManualResultModal',
-  props: [ ],
+  props: [ 'events_type' ],
   components: {
     
   },
@@ -130,7 +130,8 @@ export default {
       team_state: null,
       stage_state: null,
       distance_state: null,
-      eg_state: null
+      eg_state: null,
+      events_fn: null
     }
   },
   mounted() {
@@ -185,12 +186,18 @@ export default {
       this.wcr_teams = API.getWCRTeams()
       this.wcr_stages = API.getWCRStages()
 
-      this.getAllEvents()
+      if (this.events_type == 'all') {
+        this.events_fn = API.getAllEvents
+      } else {
+        this.events_fn = API.getActiveEvents
+      }
+
+      this.getEvents()
     },
 
-    getAllEvents() {
+    getEvents() {
       return new Promise((resolve, reject) => {
-        API.getAllEvents().then(response => {
+        this.events_fn().then(response => {
           if (Object.keys(response).indexOf('err') > -1) {
             console.log(response.err)
             reject()
@@ -258,7 +265,7 @@ export default {
 
         // Calculate elapsed time in seconds
         let elapsed_time = (3600*this.elapsed_time_h) + (60*this.elapsed_time_m) + this.elapsed_time_s
-        if (elapsed_time <= 0) {
+        if (elapsed_time <= 0 || isNaN(elapsed_time)) {
           this.err_notification = 'Please enter elapsed time'
             setTimeout(() => {
                 this.err_notification = ''
@@ -267,7 +274,7 @@ export default {
         }
 
         let moving_time = (3600*this.moving_time_h) + (60*this.moving_time_m) + this.moving_time_s
-        if (moving_time <= 0) {
+        if (moving_time <= 0 || isNaN(moving_time)) {
           this.err_notification = 'Please enter moving time'
             setTimeout(() => {
                 this.err_notification = ''
@@ -389,6 +396,7 @@ export default {
   p.event_dates {
     margin-bottom: 0;
     line-height: 40px;
+    font-size: smaller;
   }
 </style>
 
