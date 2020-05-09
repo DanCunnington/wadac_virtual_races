@@ -252,6 +252,7 @@ export default {
         "wcr_event": wcr_event,
         "distance": e.distance,
         "elevation_gain": e.elevation_gain,
+        "raw_name": e.event_name,
         "id": e._id,
       })
     },
@@ -405,7 +406,7 @@ export default {
               location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
             }
           }
-          download(csvContent, item.name+'_results.csv', 'text/csv;encoding:utf-8');
+          download(csvContent, item.raw_name+'_results.csv', 'text/csv;encoding:utf-8');
         }
       })
     }
