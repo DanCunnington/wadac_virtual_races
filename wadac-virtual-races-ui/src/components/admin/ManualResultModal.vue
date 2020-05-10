@@ -301,7 +301,8 @@ export default {
         }        
 
         let selected_event = this.full_events[this.selected_event]
-        let current_date = Date.now()
+        let d = new Date()
+        let current_date = d.toISOString().split('T')[0]+'T'+d.toLocaleTimeString()+'Z'
         let ac_name_id = this.athlete_name+"_manual_"+current_date.toString()
         let new_result = {
           "event_id": selected_event._id,

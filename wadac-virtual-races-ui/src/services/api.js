@@ -131,7 +131,14 @@ export default {
         let adj_distance = recorded_time / dist_factor
         let adj_elev = Math.pow((ref_elevation_gain / (recorded_elevation_gain / dist_factor)),0.05)
         let adj_time = parseInt(adj_distance * adj_elev)
-        return {adj_time, ref_distance, ref_elevation_gain}
+        let h = parseInt(adj_time / 3600).toString()
+        let m = parseInt((adj_time % 3600)/60).toString()
+        let s = parseInt((adj_time % 3600)%60).toString()
+        if (m.length == 1) {
+            m = '0'+m
+        }
+        let hms_str = h+':'+m+'.'+s
+        return {adj_time, ref_distance, ref_elevation_gain, hms_str}
     },
     calculateAdjustedWCRTime(stage, recorded_distance, recorded_time, recorded_elevation_gain) {
         let stageInfo = this.getWCRStages()

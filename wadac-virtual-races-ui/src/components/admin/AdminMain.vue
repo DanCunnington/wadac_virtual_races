@@ -253,13 +253,15 @@ export default {
         "distance": e.distance,
         "elevation_gain": e.elevation_gain,
         "raw_name": e.event_name,
+        "raw_start": start,
+        "raw_end": end,
         "id": e._id,
       })
     },
     editEvent(e, idx) {
-      let current_name = e.name
-      let current_start_date = e.start_date.split(' ')
-      let current_end_date = e.end_date.split(' ')
+      let current_name = e.raw_name
+      let current_start_date = e.raw_start.split(' ')
+      let current_end_date = e.raw_end.split(' ')
 
       let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       let month_idx_s = months.indexOf(current_start_date[1]) +1
@@ -272,7 +274,9 @@ export default {
         ev_start_date: re_format_s,
         ev_end_date: re_format_e,
         ev_id: e.id,
-        ev_wcr: e.wcr_event
+        ev_wcr: e.wcr_event,
+        ev_distance: e.distance,
+        ev_elevation_gain: e.elevation_gain
       }
 
       this.create_or_edit_title = 'Edit Event'
@@ -336,12 +340,12 @@ export default {
           if (wcr_event) {
             headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft', 
-            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds']
+            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms']
 
           } else if (distance && elevation_gain) {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds']
+            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms']
           } else {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
@@ -365,10 +369,11 @@ export default {
               let adj_time = adj_obj['adj_time']
               let ref_dist = adj_obj['ref_distance']
               let ref_elev = adj_obj['ref_elevation_gain']
+              let hms = adj_obj['hms_str']
 
               tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
                 activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                ref_dist, ref_elev, adj_time])
+                ref_dist, ref_elev, adj_time, hms])
 
             } else if (distance && elevation_gain) {
               // Adjust time to match event
@@ -377,15 +382,30 @@ export default {
               let adj_time = adj_obj['adj_time']
               let ref_dist = adj_obj['ref_distance']
               let ref_elev = adj_obj['ref_elevation_gain']
+              let hms = adj_obj['hms_str']
 
               tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
                 r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                ref_dist, ref_elev, adj_time])
+                ref_dist, ref_elev, adj_time, hms])
             } else {
               tmp_csv.push([start_date, r['athlete_name'], activity_name, 
                 r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
             }
           })
+          if (wcr_event) {
+            // Sort by adjusted time
+            tmp_csv.sort( function( a, b ) {
+              if ( a[11] == b[11] ) return 0;
+              return a[11] < b[11] ? -1 : 1;
+            });
+          } else if (distance && elevation_gain) {
+            // Sort by adjusted time
+            tmp_csv.sort( function( a, b ) {
+              if ( a[9] == b[9] ) return 0;
+              return a[9] < b[9] ? -1 : 1;
+            });
+          }
+          
           let csvContent = tmp_csv.map(e => e.join(",")).join("\n");
           var download = function(content, fileName, mimeType) {
             var a = document.createElement('a');

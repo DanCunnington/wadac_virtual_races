@@ -107,10 +107,13 @@ export default {
   methods: {
     initialise() {
       if (this.existing) {
+        console.log(this.existing)
         this.ev_name = this.existing.ev_name
         this.ev_start_date = this.existing.ev_start_date
         this.ev_end_date = this.existing.ev_end_date
         this.wcr_event = this.existing.ev_wcr
+        this.ev_distance = this.existing.ev_distance
+        this.ev_elevation_gain = this.existing.ev_elevation_gain
       }
     },
     validateEvent() {
@@ -220,6 +223,7 @@ export default {
     editEvent() {
       return new Promise((resolve, reject) => {
         this.validateEvent().then(new_event => {
+          console.log(new_event)
           API.editEvent(this.existing.ev_id, new_event).then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
                 console.log(response.err)
