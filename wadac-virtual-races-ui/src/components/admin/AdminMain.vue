@@ -378,7 +378,7 @@ export default {
             } else if (distance && elevation_gain) {
               // Adjust time to match event
               let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(r['distance']), 
-                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
+                parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
               let adj_time = adj_obj['adj_time']
               let ref_dist = adj_obj['ref_distance']
               let ref_elev = adj_obj['ref_elevation_gain']

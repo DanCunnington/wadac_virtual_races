@@ -134,10 +134,13 @@ export default {
         let h = parseInt(adj_time / 3600).toString()
         let m = parseInt((adj_time % 3600)/60).toString()
         let s = parseInt((adj_time % 3600)%60).toString()
+        if (h.length == 1) {
+            h = '0'+h
+        }
         if (m.length == 1) {
             m = '0'+m
         }
-        let hms_str = h+':'+m+'.'+s
+        let hms_str = h+':'+m+':'+s
         return {adj_time, ref_distance, ref_elevation_gain, hms_str}
     },
     calculateAdjustedWCRTime(stage, recorded_distance, recorded_time, recorded_elevation_gain) {

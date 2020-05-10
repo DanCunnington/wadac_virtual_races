@@ -52,12 +52,12 @@ export default {
         this.fields.push({"key": "ref_distance", "label": "Event Reference Distance (mi)", "sortable": false})
         this.fields.push({"key": "ref_elevation_gain", "label": "Event Reference Elevation Gain (ft)", "sortable": false})
         this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false})
-        this.fields.push({"key": "hms", "label": "Adjusted Time (h:m.s)", "sortable": false})
+        this.fields.push({"key": "hms", "label": "Adjusted Time (h:m:s)", "sortable": false})
 
         // Adjust time to match event
         this.preview_results_set.forEach(r => {
           let adj_obj = API.calculateAdjustedTime(parseFloat(this.ref_distance), parseFloat(this.ref_elevation_gain), 
-            parseFloat(r['distance']), parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
+            parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
           let adj_time = adj_obj['adj_time']
           let ref_dist = adj_obj['ref_distance']
           let ref_elev = adj_obj['ref_elevation_gain']
