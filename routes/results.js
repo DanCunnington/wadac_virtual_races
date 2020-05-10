@@ -1,3 +1,4 @@
+const ObjectID = require('mongodb').ObjectID;
 module.exports = (app, db) => {
 
 	// Add a new result for an event
@@ -94,6 +95,41 @@ module.exports = (app, db) => {
 				return res.json({"err": JSON.stringify(err)})
 			} else {
 				res.json(result)
+			}
+		})
+	})
+
+	// Get any results where elevation == 0
+	app.get('/missing_elevation_results', (req, res) => {
+		let query = {"elevation_gain": {$eq: "0"}}
+		db.collection('results').find(query).toArray((err, result) => {
+			if (err) {
+				res.status(500)
+				return res.json({"err": JSON.stringify(err)})
+			} else {
+				res.json(result)
+			}
+		})
+	})
+
+	//Edit a results elevation
+	app.post('/edit_result_elevation', (req, res) => {
+		let result_id = req.body.result_id
+		let new_elevation = req.body.elevation
+
+		if (!result_id || !new_elevation) {
+			res.status(400)
+			return res.json({"err": "please specify result_id and elevation"})
+		}
+
+		let query = {"_id": ObjectID(result_id)}
+		let update = {"$set": {"elevation_gain": new_elevation}}
+		db.collection('results').updateOne(query, update, (err, result) => {
+			if (err) {
+				res.status(500)
+				return res.json({"err": JSON.stringify(err)})
+			} else {
+				res.sendStatus(200)
 			}
 		})
 	})

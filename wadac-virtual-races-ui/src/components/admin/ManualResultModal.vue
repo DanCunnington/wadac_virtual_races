@@ -264,7 +264,7 @@ export default {
         }
 
         // Calculate elapsed time in seconds
-        let elapsed_time = (3600*this.elapsed_time_h) + (60*this.elapsed_time_m) + this.elapsed_time_s
+        let elapsed_time = (3600*parseFloat(this.elapsed_time_h)) + (60*parseFloat(this.elapsed_time_m)) + parseFloat(this.elapsed_time_s)
         if (elapsed_time <= 0 || isNaN(elapsed_time)) {
           this.err_notification = 'Please enter elapsed time'
             setTimeout(() => {
@@ -273,7 +273,7 @@ export default {
             return reject()
         }
 
-        let moving_time = (3600*this.moving_time_h) + (60*this.moving_time_m) + this.moving_time_s
+        let moving_time = (3600*parseFloat(this.moving_time_h)) + parseFloat((60*this.moving_time_m)) + parseFloat(this.moving_time_s)
         if (moving_time <= 0 || isNaN(moving_time)) {
           this.err_notification = 'Please enter moving time'
             setTimeout(() => {
@@ -316,6 +316,7 @@ export default {
           "distance": this.distance,
           "wcr": false
         }
+        console.log(new_result)
         // Add team and stage in for WCR
         if (this.selected_event_wcr) {
           new_result.wcr = true

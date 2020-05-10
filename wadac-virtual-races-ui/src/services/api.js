@@ -84,6 +84,12 @@ export default {
     eventResults(evt_id) {
         return Vue.prototype.$http.get(server_url+'/event_results?event_id='+evt_id)
     },
+    missingElevationResults() {
+        return Vue.prototype.$http.get(server_url+'/missing_elevation_results')
+    },
+    updateResultElevation(result_id, elevation) {
+        return Vue.prototype.$http.post(server_url+'/edit_result_elevation', {result_id, elevation})
+    },
 
     getWCRTeams() {
         return [
@@ -139,6 +145,9 @@ export default {
         }
         if (m.length == 1) {
             m = '0'+m
+        }
+        if (s.length == 1) {
+            s = '0'+s
         }
         let hms_str = h+':'+m+':'+s
         return {adj_time, ref_distance, ref_elevation_gain, hms_str}

@@ -17,10 +17,31 @@
             </div>
          </form>
     </div>
-    <div v-if="logged_in" class="table-container">
+    <div v-if="logged_in && !loading" class="table-container">
       <div class="text-left">
 
+        <!-- Warnings -->
+        <div class="warnings" v-if="warnings.length > 0">
+          <h4>Actions</h4>
+          <p>The following results contain an elevation of 0 and require fixing:</p>
+          <b-table striped hover sticky-header 
+          :items="warnings"
+          :fields="warnings_fields"
+          class="warnings-table">
+
+            <template v-slot:cell(elevation)="data">
+              <b-form-input :id="data.item.id" size="sm" class="warnings-input" v-model="edits[data.item.id]"></b-form-input>
+            </template>
+            <template v-slot:cell(resolve_btn)="data">
+              <b-button variant="success" size="sm" @click="resolveElevation(data.item)">Resolve</b-button>
+            </template>
+
+          </b-table>
+
+        </div>
+
         <!-- Modals -->
+        <h4>Events</h4>
         <div class="admin-btn-container">
           <b-button v-b-modal.modal-1 class="pull-left" variant="primary" @click="resetModalText">Create Event</b-button>
           <b-button v-b-modal.modal-2 class="pull-left mr-btn" variant="outline-primary" @click="">Manual Result Submission</b-button>
@@ -139,7 +160,17 @@ export default {
       modal_results_title: '',
       modal_results_wcr: false,
       selected_ev_ref_distance: false,
-      selected_ev_ref_elev_gain: false
+      selected_ev_ref_elev_gain: false,
+      warnings: [],
+      warnings_fields: [
+        {"key": "event_name", "sortable": false},
+        {"key": "athlete_name", "sortable": false},
+        {"key": "elevation", "label": "Elevation Gain (ft)", "sortable": false},
+        {"key": "resolve_btn", "label": "", "sortable": false}
+      ],
+      full_warnings: [],
+      edits: {},
+      loading: true
     }
   },
   mounted() {
@@ -147,7 +178,11 @@ export default {
   },
   methods: {
     initialise() {
-      this.getEvents()
+      this.getEvents().then(_ => {
+        this.getWarnings().then(_ => {
+          this.loading = false
+        })
+      })
     },
     login() {
         API.isAdmin({"password": this.password}).then(response => {
@@ -212,6 +247,34 @@ export default {
         })
       })
       
+    },
+    resolveElevation(result) {
+      let new_val = this.edits[result.id]
+      API.updateResultElevation(result.id, new_val).then(_ => {
+        this.warnings = []
+        this.full_warnings = []
+        this.getWarnings()
+      }, err => {
+        console.log(err)
+      })
+    },
+    addNewWarning(warn) {
+      let event_id = warn.event_id
+
+      // Find event name
+      this.full_events.forEach(ev => {
+        if (ev._id == event_id) {
+          let event_name = ev.event_name
+          let athlete_name = warn.athlete_name
+          let elevation = warn.elevation_gain
+          let id = warn._id
+          this.edits[id] = 0
+          let resolve_btn = id
+          this.warnings.push({id, event_name, athlete_name, elevation, resolve_btn})
+
+        }
+      })
+
     },
     addNewEvent(e) {
       let start = new Date(e.start_time).toDateString()
@@ -298,17 +361,37 @@ export default {
       })
 
     },
+    getWarnings() {
+      return new Promise((resolve, reject) => {
+        API.missingElevationResults().then(response => {
+          if (Object.keys(response).indexOf('err') > -1) {
+              console.log(response.err)
+              reject()
+          } else {
+              this.full_warnings = response.data
+              this.full_warnings.forEach((wa, idx) => {
+                this.addNewWarning(wa)
+              })
+              resolve()
+          }
+        })
+      })
+    },
     getEvents() {
+      return new Promise((resolve, reject) => {
         API.getAllEvents().then(response => {
             if (Object.keys(response).indexOf('err') > -1) {
                 console.log(response.err)
+                reject()
             } else {
                 this.full_events = response.data
                 this.full_events.forEach((ev, idx) => {
                   this.addNewEvent(ev)
                 })
+                resolve()
             }
         })
+      })
     },
     previewResults(item) {
       API.eventResults(item.id).then(response => {
@@ -482,6 +565,10 @@ export default {
 
   .mr-btn {
     margin-left: 1em;
+  }
+
+  .warnings {
+    margin-bottom: 40px;
   }
 
   /*div.modal.results-modal .modal-dialog {

@@ -2,35 +2,40 @@
   <div class="hello">
     <h1>WADAC Virtual Racing</h1>
     <div class="content">
-      <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
+      <div v-if="!refreshing">
+        <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted && !loading">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
 
-      <div v-if="!manual_submission_submitted" class="submission-container">
-        <div class="strava-option">
-          <h4 class="welcome-heading" v-if="!cookie.access_token">1) Strava (Easiest)</h4>
-          <p class="submit-instructions" v-if="!cookie.access_token">If you have a Strava account, select from one of your activities using the button below.</p> 
+        <div v-if="!manual_submission_submitted && !loading" class="submission-container">
+          <div class="strava-option">
+            <h4 class="welcome-heading" v-if="!cookie.access_token && !loading">1) Strava (Easiest)</h4>
+            <p class="submit-instructions" v-if="!cookie.access_token && !loading">If you have a Strava account, select from one of your activities using the button below.</p> 
 
-          <p class="submit-instructions strava" v-if="!cookie.access_token">Note: This application requires access to your activities but will only store the activity name, distance, elapsed time, moving time and elevation gain.</p>
-          <img v-if="!cookie.access_token && !loading" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
-          <p v-if="loading">Loading...</p>
-          <div v-if="cookie.access_token">
-            <p class="name">Hi, {{cookie.user_name}}!</p>
-            <p class="signout" @click="deauthorise()">Sign out?</p>
+            <p class="submit-instructions strava" v-if="!cookie.access_token && !loading">Note: This application requires access to your activities but will only store the activity name, distance, elapsed time, moving time and elevation gain.</p>
+            <img v-if="!cookie.access_token && !loading" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
+            <p v-if="loading">Loading...</p>
+            <div v-if="cookie.access_token && !loading">
+              <p class="name">Hi, {{cookie.user_name}}!</p>
+              <p class="signout" @click="deauthorise()">Sign out?</p>
 
-            <SubmitResult :cookie="cookie"></SubmitResult>
+              <SubmitResult :cookie="cookie"></SubmitResult>
+            </div>
+          </div>
+
+          <div class="manual-option" v-if="!cookie.access_token && !loading">
+            <b-modal id="manual-upload-modal" :ok-title="'Submit'" :title="'Manual Result Submission'" @ok="handleManualResultOk">
+              <ManualResultModal ref="mr_modal_main" :events_type="'active'"></ManualResultModal>
+            </b-modal>
+
+            <h4 class="welcome-heading">2) Manual Submission</h4>
+            <p class="submit-instructions">Alternatively, if you don't have a Strava account, you can submit your result manually by clicking <span class="manual-upload" @click="manualUpload">here</span>.</p> 
           </div>
         </div>
-
-        <div class="manual-option" v-if="!cookie.access_token">
-          <b-modal id="manual-upload-modal" :ok-title="'Submit'" :title="'Manual Result Submission'" @ok="handleManualResultOk">
-            <ManualResultModal ref="mr_modal_main" :events_type="'active'"></ManualResultModal>
-          </b-modal>
-
-          <h4 class="welcome-heading">2) Manual Submission</h4>
-          <p class="submit-instructions">Alternatively, if you don't have a Strava account, you can submit your result manually by clicking <span class="manual-upload" @click="manualUpload">here</span>.</p> 
+        <div v-else>
+          <p v-if="!loading" class="manual-ok">Thank you, your manual result submission has been saved.</p>
         </div>
       </div>
       <div v-else>
-        <p class="manual-ok">Thank you, your manual result submission has been saved.</p>
+        Loading...
       </div>
     </div>
   </div>
@@ -60,7 +65,9 @@ export default {
       event_name: '',
       manual_submission_submitted: false,
       results: [],
-      loading: false
+      loading: false,
+      refreshing: true,
+      state: 'loading'
     }
   },
   mounted() {
@@ -85,11 +92,13 @@ export default {
           if (!this.cookieExpired(cookie)) {
             this.cookie = cookie
             this.loading = false
+            this.refreshing = false
             console.log('exists')
           } else {
             this.refreshAccessToken(cookie)
           }
         } else {
+          this.refreshing = false
           // For callback, get access token
           let query_params = this.$route.query
           if (query_params && Object.keys(query_params).indexOf('code') > -1 &&
@@ -120,6 +129,7 @@ export default {
       // Route to homepage
       let query_params = this.$route.query
       this.loading = false
+      this.refreshing = false
       if (query_params && Object.keys(query_params).indexOf('code') > -1 && 
         Object.keys(query_params).indexOf('scope') > -1) {
         this.$router.push('/') 
@@ -132,6 +142,7 @@ export default {
       window.location.href=url
     },
     refreshAccessToken(c) {
+      this.refreshing = true
       let refresh_token = c.refresh_token
       let user_name = c.user_name
       API.refreshAccessToken(refresh_token).then(response => {
@@ -149,6 +160,9 @@ export default {
           this.cookie = new_cookie
           this.loading = false
           console.log('refreshed')
+          setTimeout(_ => {
+            this.refreshing = false
+          }, 1000)
         }
       }, err => {
         this.deauthorise()
