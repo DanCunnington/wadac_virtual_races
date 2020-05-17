@@ -38,8 +38,10 @@ mongo_client.connect(err => {
 	  "redirect_uri"  : "https://localhost:3000",
 	});
 
+	// Pass to Vue.js front-end
 	app.use('/', express.static(path.join(__dirname, 'ui')))
 	app.use('/admin', express.static(path.join(__dirname, 'ui')))
+	app.use('/results', express.static(path.join(__dirname, 'ui')))
 
 	// Routes
 	require('./routes/auth.js')(app, db, strava)

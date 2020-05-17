@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Admin from '../views/Admin.vue'
+import ResultsPage from '../views/ResultsPage.vue'
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,11 @@ Vue.use(VueRouter)
     //  return import(/* webpackChunkName: "about" */ '../views/Admin.vue')
     //}
     component: Admin
+  },
+  {
+    path: '/results',
+    name: 'ResultsPage',
+    component: ResultsPage
   }
 ]
 

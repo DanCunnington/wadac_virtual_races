@@ -52,7 +52,7 @@ export default {
         this.fields.push({"key": "ref_distance", "label": "Event Reference Distance (mi)", "sortable": false})
         this.fields.push({"key": "ref_elevation_gain", "label": "Event Reference Elevation Gain (ft)", "sortable": false})
         this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false})
-        this.fields.push({"key": "hms", "label": "Adjusted Time (h:m:s)", "sortable": false})
+        this.fields.push({"key": "hms", "label": "Adjusted Time (hh:mm:ss)", "sortable": false})
 
         // Adjust time to match event
         this.preview_results_set.forEach(r => {
@@ -73,7 +73,7 @@ export default {
         this.fields.push({"key": "ref_distance", "label": "Stage Reference Distance (mi)", "sortable": false})
         this.fields.push({"key": "ref_elevation_gain", "label": "Stage Reference Elevation Gain (ft)", "sortable": false})
         this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false})
-        this.fields.push({"key": "hms", "label": "Adjusted Time (h:m.s)", "sortable": false})
+        this.fields.push({"key": "hms", "label": "Adjusted Time (hh:mm:ss)", "sortable": false})
 
 
         // Adjust time to match WCR stage

@@ -2,6 +2,7 @@
   <div class="hello">
     <h1>WADAC Virtual Racing</h1>
     <div class="content">
+      <p class="results-link" @click="$router.push('/results')">Provisional Results</p>
       <div v-if="!refreshing">
         <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted && !loading">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
 
@@ -295,5 +296,13 @@ p.manual-ok {
   text-align: center;
 }
 
+.results-link {
+  color: blue;
+  text-decoration: underline;
+}
+
+.results-link:hover {
+  cursor: pointer;
+}
 
 </style>
