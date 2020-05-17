@@ -43,7 +43,7 @@ mongo_client.connect(err => {
 	app.use('/admin', express.static(path.join(__dirname, 'ui')))
 	app.use('/results', express.static(path.join(__dirname, 'ui')))
 
-	// Routes
+	// Server routes
 	require('./routes/auth.js')(app, db, strava)
 	require('./routes/events.js')(app, db)
 	require('./routes/results.js')(app, db)

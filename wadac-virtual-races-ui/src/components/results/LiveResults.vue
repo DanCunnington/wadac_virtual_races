@@ -20,6 +20,11 @@
         :items="preview_results_set"
         :sort-by="'adjusted_time'"
         class="live-results-table">
+
+        <template v-slot:cell(pos)="data">
+          <span v-html="data.index + 1"></span>
+        </template>
+
       </b-table>
     </div>  
     <div v-else-if="show_results" class="italic">
@@ -102,6 +107,7 @@ export default {
             this.fields.push({"key": "wcr_stage", "label": "Stage", "sortable": false})
           } 
           if (this.ref_distance && this.ref_elevation_gain) {
+            this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
             this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
 
             // Adjust time to match event
@@ -110,10 +116,12 @@ export default {
                 parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
               let hms = adj_obj['hms_str']
               r.hms = hms
+              r.adjusted_time = adj_obj['adj_time']
               r.pos = idx + 1
             })
           } else if (this.wcr) {
-            this.fields.push({"key": "hms", "label": "Adjusted Time (hh:mm:ss)", "sortable": false})
+            this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
+            this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
 
             // Adjust time to match WCR stage
             this.preview_results_set.forEach((r, idx) => {
@@ -121,6 +129,7 @@ export default {
                 parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
               let hms = adj_obj['hms_str']
               r.hms = hms
+              r.adjusted_time = adj_obj['adj_time']
               r.pos = idx + 1
             })
           }
