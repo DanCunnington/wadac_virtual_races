@@ -11,7 +11,7 @@
             <h4 class="welcome-heading" v-if="!cookie.access_token && !loading">1) Strava (Easiest)</h4>
             <p class="submit-instructions" v-if="!cookie.access_token && !loading">If you have a Strava account, select from one of your activities using the button below.</p> 
 
-            <p class="submit-instructions strava" v-if="!cookie.access_token && !loading">Note: This application requires access to your activities but will only store the activity name, distance, elapsed time, moving time and elevation gain.</p>
+            <p class="submit-instructions strava" v-if="!cookie.access_token && !loading">Note: This application requires access to your activities. The activity name, start time, distance, elapsed time, moving time and elevation gain of the activity you choose to submit will be stored.</p>
             <img v-if="!cookie.access_token && !loading" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
             <p v-if="loading">Loading...</p>
             <div v-if="cookie.access_token && !loading">
