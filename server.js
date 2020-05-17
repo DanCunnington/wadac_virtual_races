@@ -29,7 +29,9 @@ mongo_client.connect(err => {
 	const db = mongo_client.db(db_name);
 
 	// Setup app
-	app.use(cors())
+	if (process.env.NODE_ENV !== 'production') {
+		app.use(cors())
+	}
 	app.use(bodyParser.json())
 
 	strava.config({
