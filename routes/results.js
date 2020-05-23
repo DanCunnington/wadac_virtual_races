@@ -1,22 +1,24 @@
 const ObjectID = require('mongodb').ObjectID;
-module.exports = (app, db) => {
+module.exports = (app, db, strava) => {
 
 	// Add a new result for an event
 	app.post('/submit_result', (req, res) => {
-		let event_id = req.body.event_id
-		let athlete_name = req.body.athlete_name
-		let activity_name = req.body.activity_name
-		let activity_id = req.body.activity_id
-		let elapsed_time = req.body.elapsed_time
-		let start_date = req.body.start_date
-		let moving_time = req.body.moving_time
-		let elevation_gain = req.body.elevation_gain
-		let distance = req.body.distance
+		let new_result = req.body.result
+		let access_token = req.body.access_token
+		let event_id = new_result.event_id
+		let athlete_name = new_result.athlete_name
+		let activity_name = new_result.activity_name
+		let activity_id = new_result.activity_id
+		let elapsed_time = new_result.elapsed_time
+		let start_date = new_result.start_date
+		let moving_time = new_result.moving_time
+		let elevation_gain = new_result.elevation_gain
+		let distance = new_result.distance
 
 		// WCR
-		let wcr = req.body.wcr
-		let team = req.body.wcr_team
-		let stage = req.body.wcr_stage
+		let wcr = new_result.wcr
+		let team = new_result.wcr_team
+		let stage = new_result.wcr_stage
 
 		if (!event_id || !activity_name || !activity_id || !start_date || !athlete_name || 
 			!elapsed_time || !moving_time || ! elevation_gain || !distance) {
@@ -30,11 +32,46 @@ module.exports = (app, db) => {
 			return res.json({"err": "for wcr please specify team and stage"})
 		}
 
+		// Get stream data for elevation
+		let getElevationData = function() {
+			let params = {"id": activity_id, "types": "altitude", "access_token": access_token}
+			strava.streams.activity(params, (err, result) => {
+				if (err) {
+					insertResultToDb()
+				} else {
+					let altitude_item = null
+					result.forEach(item => {
+						if (item['type'] == 'altitude') {
+							altitude_item = item
+						}
+					})
+
+					// If we can find altitude data
+					if (altitude_item !== null) {
+						// Get start and end
+						start = parseFloat(altitude_item['data'][0] * 3.281)
+						end = parseFloat(altitude_item['data'][altitude_item['data'].length -1] * 3.281)
+
+						// Net elevation change
+						net_elevation_change = (end - start).toFixed(2)
+						insertResultToDb(net_elevation_change)
+
+					} else {
+						insertResultToDb()
+					}
+				}
+			})
+		}
+
 		// Insert function
-		let insertResultToDb = function() {
+		let insertResultToDb = function(net_elevation_change) {
 			// Insert to database			
 			let result = {event_id, athlete_name, activity_id, activity_name, start_date, 
 				elapsed_time, moving_time, elevation_gain, distance}
+
+			if (net_elevation_change) {
+				result.net_elevation_change = net_elevation_change
+			}
 
 			if (wcr) {
 				result.wcr = true
@@ -70,7 +107,12 @@ module.exports = (app, db) => {
 
 				// If none - go ahead and submit
 				if (m_result.length == 0) {
-					insertResultToDb()
+					// If strava submission, get elevation data
+					if (access_token) {
+						getElevationData()
+					} else {
+						insertResultToDb()
+					}
 				} else {
 					res.status(400)
 					return res.json({"err": "result already inserted"})

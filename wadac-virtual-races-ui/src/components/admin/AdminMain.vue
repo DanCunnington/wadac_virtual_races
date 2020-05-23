@@ -422,13 +422,15 @@ export default {
           let headers = []
           if (wcr_event) {
             headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
-            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft', 
-            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms']
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 
+            'adjusted_time_hms']
 
           } else if (distance && elevation_gain) {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms']
+            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 
+            'adjusted_time_hms']
           } else {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
@@ -456,7 +458,7 @@ export default {
 
               tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
                 activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                ref_dist, ref_elev, adj_time, hms])
+                r['net_elevation_change'], ref_dist, ref_elev, adj_time, hms])
 
             } else if (distance && elevation_gain) {
               // Adjust time to match event
@@ -469,7 +471,7 @@ export default {
 
               tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
                 r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                ref_dist, ref_elev, adj_time, hms])
+                r['net_elevation_change'], ref_dist, ref_elev, adj_time, hms])
             } else {
               tmp_csv.push([start_date, r['athlete_name'], activity_name, 
                 r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])

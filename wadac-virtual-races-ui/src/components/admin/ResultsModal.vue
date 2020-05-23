@@ -46,6 +46,7 @@ export default {
       this.fields.push({"key": "elapsed_time", "label": "Elapsed Time (s)", "sortable": false})
       this.fields.push({"key": "moving_time", "label": "Moving Time (s)", "sortable": false})
       this.fields.push({"key": "elevation_gain", "label": "Elevation Gain (ft)", "sortable": false})
+      this.fields.push({"key": "net_elevation_change", "label": "Net Elevation Change (ft)", "sortable": false})
       this.fields.push({"key": "distance", "label": "Distance (mi)", "sortable": false})
 
       if (this.ref_distance && this.ref_elevation_gain) {

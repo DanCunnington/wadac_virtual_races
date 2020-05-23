@@ -48,7 +48,7 @@ mongo_client.connect(err => {
 	// Server routes
 	require('./routes/auth.js')(app, db, strava)
 	require('./routes/events.js')(app, db)
-	require('./routes/results.js')(app, db)
+	require('./routes/results.js')(app, db, strava)
 	require('./routes/athletes.js')(app, db, strava)
 
 	// Start server

@@ -60,8 +60,17 @@ export default {
         })
     },
 
-    submitResult(result) {
-        return Vue.prototype.$http.post(server_url+'/submit_result', result)
+    submitResult(result, access_token) {
+        let obj = {result, access_token}
+        return new Promise((resolve, reject) => {
+            Vue.prototype.$http.post(server_url+'/submit_result', obj).then(response => {
+                return resolve(response)
+            }, err => {
+                // If access token is invalid, deauthorise
+                console.log(err)
+                this.clearCookie()
+            })  
+        })
     },
 
     isAdmin(password) {

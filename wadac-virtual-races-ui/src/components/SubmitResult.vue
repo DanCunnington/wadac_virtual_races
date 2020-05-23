@@ -60,7 +60,12 @@
           </div>
           <div class="form-group row" v-if="selected_event != null">
             <div class="col-sm-12">
-              <button type="submit" class="btn btn-primary float-right">Submit</button>
+              <button type="submit" class="btn btn-primary float-right submit-result-btn" :disabled="submit_disabled">
+                Submit
+                <div class=spin-container v-if="submit_disabled">
+                  <b-spinner small></b-spinner>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -103,7 +108,8 @@ export default {
       err_notification: '',
       wcr_teams: [],
       wcr_stages: [],
-      loading_str: 'Loading...'
+      loading_str: 'Loading...',
+      submit_disabled: false
     }
   },
   mounted() {
@@ -219,6 +225,7 @@ export default {
       this.err_notification = 'You have tried to submit an activity with 0 miles or 0 seconds. Please submit another activity.'
     },
     submitResult() {
+      this.submit_disabled = true
       let selected_acc = this.full_activities[this.selected_activity]
       let selected_event = this.full_events[this.selected_event]
       let new_result = {
@@ -240,16 +247,19 @@ export default {
         new_result.wcr_stage = this.selected_stage
       }
       if (new_result.elapsed_time && new_result.moving_time && new_result.distance) {
-        API.submitResult(new_result).then(response => {
+        API.submitResult(new_result, this.cookie.access_token).then(response => {
           if (Object.keys(response).indexOf('err') > -1) {
             console.log(response.err)
             this.handleGenericSubmitError()
+            this.submit_disabled = false
           } else {
             // Done
             this.submitted = true
             this.err_notification = ''
+            this.submit_disabled = false
           }
         }, err => {
+          this.submit_disabled = false
           if (Object.keys(err).indexOf('response') > -1 && err.response) {
             let msg = err.response.data
             if (Object.keys(msg).indexOf('err') > -1) {
@@ -311,6 +321,16 @@ export default {
 
   p.err_notification {
     color: red;
+  }
+
+  .spin-container {
+    margin-left: 7px;
+    position: relative;
+    bottom: 3px;
+  }
+
+  button.submit-result-btn {
+    display: inline-flex;
   }
 
 </style>
