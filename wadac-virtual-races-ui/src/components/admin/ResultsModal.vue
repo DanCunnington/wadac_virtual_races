@@ -102,6 +102,7 @@ export default {
 
         })
       } else if (this.wcr) {
+        this.fields.push({"key": "net_elevation_change", "label": "Net Elevation Change (ft)", "sortable": false})
         this.fields.push({"key": "ref_distance", "label": "Stage Reference Distance (mi)", "sortable": false})
         this.fields.push({"key": "ref_elevation_gain", "label": "Stage Reference Elevation Gain (ft)", "sortable": false})
         this.fields.push({"key": "ref_elevation_change", "label": "Stage Reference Elevation Change (ft)", "sortable": false})
@@ -118,7 +119,6 @@ export default {
           let ref_elev = adj_obj['ref_elevation_gain']
           let ref_elev_change = adj_obj['ref_elevation_change']
           let hms = adj_obj['hms_str']
-
           r.ref_distance = ref_dist
           r.ref_elevation_gain = ref_elev
           r.ref_elevation_change = ref_elev_change
