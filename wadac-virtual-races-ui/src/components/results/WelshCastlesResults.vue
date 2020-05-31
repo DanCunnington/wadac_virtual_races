@@ -4,6 +4,7 @@
       <div class="row">
         <div class="team-results col-lg-5">
           <h5 class="wcr-team-head">Current Team Standings</h5>
+          <p class="sm-it">Note. These times are calculated based on the current results submitted and therefore may not be complete. Final results will be circulated when the results are available.</p>
           <div v-if="wcr_total_team_results.length > 0">
             <b-table striped hover sticky-header bordered
               :fields="fields"
@@ -17,7 +18,7 @@
             </b-table>
           </div>
           <div v-else>
-            <p class="missing-stage-results">Team standings will be available when results are submitted.</p>
+            <p class="sm-it">Team standings will be available when results are submitted.</p>
           </div>
         </div>
         <div class="stage-results col-lg-7">
@@ -42,7 +43,7 @@
                 </b-table>
               </div>
               <div v-else>
-                <p class="missing-stage-results">No stage results submitted yet. Please check back later.</p>
+                <p class="sm-it">No stage results submitted yet. Please check back later.</p>
               </div>
             </div>
           </div>
@@ -207,7 +208,7 @@ export default {
   margin-top: 30px;
  }
 
- p.missing-stage-results {
+ p.sm-it {
   margin-top: 20px;
   font-style: italic;
   font-size: small;
