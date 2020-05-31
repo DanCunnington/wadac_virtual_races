@@ -4,13 +4,16 @@
     <h3 class="results-head">Provisional Results</h3>
     <div class="event-select-container" v-if="!loading">
       <div class="row">
-        <b-form-select v-model="selected_event" :options="events" required></b-form-select>
+        <label for="event" class="col-sm-3 col-form-label">Event</label>
+        <div class="col-sm-9">
+          <b-form-select v-model="selected_event" :options="events" required></b-form-select>
+        </div>
       </div>
     </div>
     <div v-else>
       <p>Loading...</p>
     </div>
-    <div v-if="preview_results_set.length > 0">
+    <div v-if="!wcr && preview_results_set.length > 0">
       <div class="event-stats">
         <p><span class="stat-label">Event Distance:</span> <span class="ref-distance">{{ref_distance}}</span> mi</p>
         <p><span class="stat-label">Event Elevation Gain:</span> <span class="ref-distance">{{ref_elevation_gain}}</span> ft</p>
@@ -27,9 +30,11 @@
         <template v-slot:cell(pos)="data">
           <span v-html="data.index + 1"></span>
         </template>
-
       </b-table>
     </div>  
+    <div v-else-if="wcr">
+      <WelshCastlesResults :preview_results_set="preview_results_set"></WelshCastlesResults>
+    </div>
     <div v-else-if="show_results" class="italic">
       No results submitted
     </div> 
@@ -38,12 +43,14 @@
 <script>
 import API from '../../services/api.js'
 import ResultsModal from '../admin/ResultsModal.vue'
+import WelshCastlesResults from './WelshCastlesResults.vue'
 
 export default {
   name: 'LiveResults',
   props: [],
   components: {
-    ResultsModal
+    ResultsModal,
+    WelshCastlesResults
   },
   data () {
     return {
@@ -107,10 +114,6 @@ export default {
             {"key": "pos", "sortable": false},
             {"key": "athlete_name", "sortable": false}
           ]
-          if (this.wcr) {
-            this.fields.push({"key": "wcr_team", "label": "Team", "sortable": false})
-            this.fields.push({"key": "wcr_stage", "label": "Stage", "sortable": false})
-          } 
           if (this.ref_distance && this.ref_elevation_gain && this.ref_elevation_change) {
             this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
             this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
@@ -133,19 +136,6 @@ export default {
             this.preview_results_set.forEach((r, idx) => {
               let adj_obj = API.calculateAdjustedTimeOLD(parseFloat(this.ref_distance), parseFloat(this.ref_elevation_gain), 
                 parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
-              let hms = adj_obj['hms_str']
-              r.hms = hms
-              r.adjusted_time = adj_obj['adj_time']
-              r.pos = idx + 1
-            })
-          } else if (this.wcr) {
-            this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
-            this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
-
-            // Adjust time to match WCR stage
-            this.preview_results_set.forEach((r, idx) => {
-              let adj_obj = API.calculateAdjustedWCRTime(parseInt(r['wcr_stage']), parseFloat(r['distance']), 
-                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
               let hms = adj_obj['hms_str']
               r.hms = hms
               r.adjusted_time = adj_obj['adj_time']

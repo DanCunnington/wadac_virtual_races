@@ -153,7 +153,7 @@ export default {
   },
   data () {
     return {
-      logged_in: true,
+      logged_in: false,
       password: '',
       events: [],
       fields: [
