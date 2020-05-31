@@ -6,6 +6,7 @@ module.exports = (app, db) => {
 		let end_time = req.body.end_time
 		let distance = req.body.distance
 		let elevation_gain = req.body.elevation_gain
+		let elevation_change = req.body.elevation_change
 		let wcr_event = false
 		if (Object.keys(req.body).indexOf('wcr_event') > -1) {
 			wcr_event = req.body.wcr_event
@@ -16,9 +17,9 @@ module.exports = (app, db) => {
 			return res.json({"err": "please specify event_name, start_time and end_time and ensure end_time is after start_time."})
 		}
 
-		if (!wcr_event && (!distance || !elevation_gain)) {
+		if (!wcr_event && (!distance || !elevation_gain || !elevation_change)) {
 			res.status(400)
-			return res.json({"err": "please specify distance and elevation gain for non welsh castles events."})
+			return res.json({"err": "please specify distance, elevation gain and elevation change for non welsh castles events."})
 		}
 
 		// Insert to database
@@ -26,6 +27,7 @@ module.exports = (app, db) => {
 		if (!wcr_event) {
 			event.distance = distance
 			event.elevation_gain = elevation_gain
+			event.elevation_change = elevation_change
 		}
 		db.collection('events').insertOne(event, (err, result) => {
 			if (err) {
@@ -45,6 +47,7 @@ module.exports = (app, db) => {
 		let wcr_event = false
 		let distance = req.body.distance
 		let elevation_gain = req.body.elevation_gain
+		let elevation_change = req.body.elevation_change
 
 		if (Object.keys(req.body).indexOf('wcr_event') > -1) {
 			wcr_event = req.body.wcr_event
@@ -55,9 +58,9 @@ module.exports = (app, db) => {
 			return res.json({"err": "please specify id, event_name, start_time and end_time and ensure end_time is after start_time."})
 		}
 
-		if (!wcr_event && (!distance || !elevation_gain)) {
+		if (!wcr_event && (!distance || !elevation_gain || !elevation_change)) {
 			res.status(400)
-			return res.json({"err": "please specify distance and elevation gain for non welsh castles events."})
+			return res.json({"err": "please specify distance, elevation gain and elevation change for non welsh castles events."})
 		}
 
 		// Insert to database
@@ -65,6 +68,7 @@ module.exports = (app, db) => {
 		if (!wcr_event) {
 			event.distance = distance
 			event.elevation_gain = elevation_gain
+			event.elevation_change = elevation_change
 		}
 		let query = {"_id": ObjectID(_id)}
 		let update = {"$set": event}

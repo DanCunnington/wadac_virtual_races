@@ -96,8 +96,8 @@ export default {
     missingElevationResults() {
         return Vue.prototype.$http.get(server_url+'/missing_elevation_results')
     },
-    updateResultElevation(result_id, elevation) {
-        return Vue.prototype.$http.post(server_url+'/edit_result_elevation', {result_id, elevation})
+    updateResultElevation(result_id, elevation_gain, elevation_change) {
+        return Vue.prototype.$http.post(server_url+'/edit_result_elevation', {result_id, elevation_gain, elevation_change})
     },
 
     getWCRTeams() {
@@ -141,7 +141,8 @@ export default {
             }
         ]
     },
-    calculateAdjustedTime(ref_distance, ref_elevation_gain, recorded_distance, recorded_time, recorded_elevation_gain) {
+    calculateAdjustedTimeOLD(ref_distance, ref_elevation_gain, recorded_distance, recorded_time, 
+        recorded_elevation_gain) {
         let dist_factor = recorded_distance / ref_distance
         let adj_distance = recorded_time / dist_factor
         let adj_elev = Math.pow((ref_elevation_gain / (recorded_elevation_gain / dist_factor)),0.05)
@@ -161,18 +162,48 @@ export default {
         let hms_str = h+':'+m+':'+s
         return {adj_time, ref_distance, ref_elevation_gain, hms_str}
     },
-    calculateAdjustedWCRTime(stage, recorded_distance, recorded_time, recorded_elevation_gain) {
+    calculateAdjustedTime(ref_distance, ref_elevation_gain, ref_elevation_change, recorded_distance, recorded_time, 
+        recorded_elevation_gain, recorded_elev_change) {
+        let dist_factor = recorded_distance / ref_distance
+        let adj_distance = recorded_time / dist_factor
+        let average_pace = recorded_time / recorded_distance
+        let total_climb = recorded_elevation_gain + recorded_elev_change
+        let scaled_climb = total_climb / dist_factor
+        let excess_elev_change = scaled_climb - (ref_elevation_change + ref_elevation_gain)
+        let elev_change_per_mile = (7 / 100) * (excess_elev_change / recorded_distance)
+        let new_avg_pace = average_pace * (1 - (elev_change_per_mile / 100))
+
+        let adj_time = parseInt(new_avg_pace * ref_distance)
+
+        let h = parseInt(adj_time / 3600).toString()
+        let m = parseInt((adj_time % 3600)/60).toString()
+        let s = parseInt((adj_time % 3600)%60).toString()
+        if (h.length == 1) {
+            h = '0'+h
+        }
+        if (m.length == 1) {
+            m = '0'+m
+        }
+        if (s.length == 1) {
+            s = '0'+s
+        }
+        let hms_str = h+':'+m+':'+s
+        return {adj_time, ref_distance, ref_elevation_gain, ref_elevation_change, hms_str}
+    },
+    calculateAdjustedWCRTime(stage, recorded_distance, recorded_time, recorded_elevation_gain, recorded_elev_change) {
         let stageInfo = this.getWCRStages()
         let dayOne = stageInfo[1].options
         let dayTwo = stageInfo[2].options
 
         let ref_distance = null
         let ref_elevation_gain = null
+        let ref_change = null
         if (stage <= 10) {
             dayOne.forEach(s => {
                 if (s.value == stage) {
                     ref_distance = s.ref_distance
                     ref_elevation_gain = s.ref_elevation_gain
+                    ref_change = s.ref_elevation_change
                 }
             })
         } else {
@@ -180,13 +211,15 @@ export default {
                 if (s.value == stage) {
                     ref_distance = s.ref_distance
                     ref_elevation_gain = s.ref_elevation_gain
+                    ref_change = s.ref_elevation_change
                 }
             })
         }
         if (!ref_distance || !ref_elevation_gain) {
             return false
         } else {
-            return this.calculateAdjustedTime(ref_distance, ref_elevation_gain, recorded_distance, recorded_time, recorded_elevation_gain)
+            return this.calculateAdjustedTime(ref_distance, ref_elevation_gain, ref_change, recorded_distance, 
+                recorded_time, recorded_elevation_gain, recorded_change)
         }
     }
 }

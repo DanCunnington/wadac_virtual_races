@@ -89,6 +89,13 @@
             </div>
           </div>
 
+          <div class="form-group row">
+            <label for="elevation_change" class="col-sm-4 col-form-label">Net Elevation Change (ft)</label>
+            <div class="col-sm-8">
+              <b-form-input id="elevation_change" :state="ec_state" v-model="elevation_change"></b-form-input>
+            </div>
+          </div>
+
         </div>
 
    </form>
@@ -125,12 +132,14 @@ export default {
       moving_time: null,
       distance: null,
       elevation_gain: null,
+      elevation_change: null,
       name_state: null,
       event_state: null,
       team_state: null,
       stage_state: null,
       distance_state: null,
       eg_state: null,
+      ec_state: null,
       events_fn: null
     }
   },
@@ -177,6 +186,11 @@ export default {
     elevation_gain: function(val) {
       if (val) {
         this.eg_state = null
+      }
+    }, 
+    elevation_change: function(val) {
+      if (val) {
+        this.ec_state = null
       }
     }
   },
@@ -298,6 +312,15 @@ export default {
                 this.err_notification = ''
             }, 2000)
             return reject()
+        } 
+
+        if (!this.elevation_change) {
+          this.err_notification = 'Please enter net elevation change in feet'
+          this.ec_state = false
+            setTimeout(() => {
+                this.err_notification = ''
+            }, 2000)
+            return reject()
         }        
 
         let selected_event = this.full_events[this.selected_event]
@@ -313,6 +336,7 @@ export default {
           "elapsed_time": elapsed_time,
           "moving_time": moving_time,
           "elevation_gain": this.elevation_gain,
+          "manual_elevation_change": this.elevation_change,
           "distance": this.distance,
           "wcr": false
         }

@@ -15,6 +15,9 @@
         <p><span class="stat-label">Event Distance:</span> <span class="ref-distance">{{ref_distance}}</span> mi</p>
         <p><span class="stat-label">Event Elevation Gain:</span> <span class="ref-distance">{{ref_elevation_gain}}</span> ft</p>
       </div>
+      <div class="event-stats">
+        <p class="net-chng" v-if="ref_elevation_change"><span class="stat-label">Event Net Elevation Change:</span> <span class="ref-distance">{{ref_elevation_change}}</span> ft</p>
+      </div>
       <b-table striped hover sticky-header 
         :fields="fields"
         :items="preview_results_set"
@@ -52,6 +55,7 @@ export default {
       fields: [],
       ref_distance: false,
       ref_elevation_gain: false,
+      ref_elevation_change: false,
       wcr: false,
       show_results: false
     }
@@ -97,6 +101,7 @@ export default {
           this.wcr = item.wcr_event
           this.ref_distance = item.distance
           this.ref_elevation_gain = item.elevation_gain
+          this.ref_elevation_change = item.elevation_change
 
           this.fields = [
             {"key": "pos", "sortable": false},
@@ -106,13 +111,27 @@ export default {
             this.fields.push({"key": "wcr_team", "label": "Team", "sortable": false})
             this.fields.push({"key": "wcr_stage", "label": "Stage", "sortable": false})
           } 
-          if (this.ref_distance && this.ref_elevation_gain) {
+          if (this.ref_distance && this.ref_elevation_gain && this.ref_elevation_change) {
             this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
             this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
 
             // Adjust time to match event
             this.preview_results_set.forEach((r, idx) => {
               let adj_obj = API.calculateAdjustedTime(parseFloat(this.ref_distance), parseFloat(this.ref_elevation_gain), 
+                parseFloat(this.ref_elevation_change), parseFloat(r['distance']), parseFloat(r['moving_time']), 
+                parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
+              let hms = adj_obj['hms_str']
+              r.hms = hms
+              r.adjusted_time = adj_obj['adj_time']
+              r.pos = idx + 1
+            })
+          } else if (this.ref_distance && this.ref_elevation_gain) {
+            this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
+            this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
+
+            // Adjust time to match event
+            this.preview_results_set.forEach((r, idx) => {
+              let adj_obj = API.calculateAdjustedTimeOLD(parseFloat(this.ref_distance), parseFloat(this.ref_elevation_gain), 
                 parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
               let hms = adj_obj['hms_str']
               r.hms = hms
@@ -180,6 +199,12 @@ export default {
 
   h3.results-head {
     margin-top: 10px;
+  }
+
+  p.net-chng {
+    margin: 0 auto;
+    max-width: 100%;
+    margin-bottom: 20px;
   }
   
 

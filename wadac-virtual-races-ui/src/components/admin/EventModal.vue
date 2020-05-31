@@ -45,6 +45,12 @@
               <b-form-input id="elevation_gain" :state="eg_state" v-model="ev_elevation_gain"></b-form-input>
             </div>
           </div>
+          <div class="form-group row">
+            <label for="elevation_change" class="col-sm-6 col-form-label">Event Net Elevation Change (ft)</label>
+            <div class="col-sm-6">
+              <b-form-input id="elevation_change" :state="ec_state" v-model="ev_elevation_change"></b-form-input>
+            </div>
+          </div>
         </div>
      </form>
   </div>
@@ -65,11 +71,13 @@ export default {
       ev_end_date: null,
       ev_distance: null,
       ev_elevation_gain: null,
+      ev_elevation_change: null,
       start_state: null,
       end_state: null,
       name_state: null,
       distance_state: null,
       eg_state: null,
+      ec_state: null,
       wcr_event: false,
       notification: ''
     }
@@ -102,6 +110,11 @@ export default {
       if (val) {
         this.eg_state = null
       }
+    },
+    ev_elevation_change: function(val) {
+      if (val) {
+        this.ec_state = null
+      }
     }
   },
   methods: {
@@ -114,10 +127,16 @@ export default {
         this.wcr_event = this.existing.ev_wcr
         this.ev_distance = this.existing.ev_distance
         this.ev_elevation_gain = this.existing.ev_elevation_gain
+        this.ev_elevation_change = this.existing.ev_elevation_change
       }
     },
     validateEvent() {
       return new Promise((resolve, reject) => {
+        let picked_start = this.ev_start_date.split('-')
+        let picked_end = this.ev_end_date.split('-')
+        let start_date = new Date(parseInt(picked_start[0]), parseInt(picked_start[1])-1, parseInt(picked_start[2])).getTime()
+        let end_date = new Date(parseInt(picked_end[0]), parseInt(picked_end[1])-1, parseInt(picked_end[2]), 23, 59, 59).getTime()
+
         if (!this.ev_name) {
           this.notification = 'Please enter an event name'
           this.name_state = false
@@ -143,7 +162,7 @@ export default {
             return reject()
         }
 
-        if (this.ev_end_date <= this.ev_start_date) {
+        if (this.end_date < this.start_date) {
           this.notification = 'Please ensure the event end date is after the start date'
           this.end_state = false
           setTimeout(() => {
@@ -170,13 +189,16 @@ export default {
             }, 2000)
             return reject()
           }
+
+          if (!this.ev_elevation_change) {
+            this.notification = 'Please enter a net event elevation change in feet'
+            this.ec_state = false
+            setTimeout(() => {
+                this.notification = ''
+            }, 2000)
+            return reject()
+          }
         }
-
-
-        let picked_start = this.ev_start_date.split('-')
-        let picked_end = this.ev_end_date.split('-')
-        let start_date = new Date(parseInt(picked_start[0]), parseInt(picked_start[1])-1, parseInt(picked_start[2])).getTime()
-        let end_date = new Date(parseInt(picked_end[0]), parseInt(picked_end[1])-1, parseInt(picked_end[2]), 23, 59, 59).getTime()
 
         let new_event = {
             "name": this.ev_name,
@@ -188,6 +210,7 @@ export default {
         if (!this.wcr_event) {
           new_event.distance = this.ev_distance
           new_event.elevation_gain = this.ev_elevation_gain
+          new_event.elevation_change = this.ev_elevation_change
         }
         resolve(new_event)
       })

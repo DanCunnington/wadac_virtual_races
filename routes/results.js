@@ -14,6 +14,7 @@ module.exports = (app, db, strava) => {
 		let moving_time = new_result.moving_time
 		let elevation_gain = new_result.elevation_gain
 		let distance = new_result.distance
+		let manual_elevation_change = new_result.manual_elevation_change
 
 		// WCR
 		let wcr = new_result.wcr
@@ -32,12 +33,14 @@ module.exports = (app, db, strava) => {
 			return res.json({"err": "for wcr please specify team and stage"})
 		}
 
+		let missing_net_elevation = "MISSING"
+
 		// Get stream data for elevation
 		let getElevationData = function() {
 			let params = {"id": activity_id, "types": "altitude", "access_token": access_token}
 			strava.streams.activity(params, (err, result) => {
 				if (err) {
-					insertResultToDb()
+					insertResultToDb(missing_net_elevation)
 				} else {
 					let altitude_item = null
 					result.forEach(item => {
@@ -57,7 +60,7 @@ module.exports = (app, db, strava) => {
 						insertResultToDb(net_elevation_change)
 
 					} else {
-						insertResultToDb()
+						insertResultToDb(missing_net_elevation)
 					}
 				}
 			})
@@ -110,8 +113,10 @@ module.exports = (app, db, strava) => {
 					// If strava submission, get elevation data
 					if (access_token) {
 						getElevationData()
+					} else if (manual_elevation_change) {
+						insertResultToDb(manual_elevation_change)
 					} else {
-						insertResultToDb()
+						insertResultToDb(missing_net_elevation)
 					}
 				} else {
 					res.status(400)
@@ -143,7 +148,7 @@ module.exports = (app, db, strava) => {
 
 	// Get any results where elevation == 0
 	app.get('/missing_elevation_results', (req, res) => {
-		let query = {"elevation_gain": {$eq: "0"}}
+		let query = {"$or": [{"elevation_gain": {$eq: "0"}}, {"net_elevation_change": {$eq: "MISSING"}} ]}
 		db.collection('results').find(query).toArray((err, result) => {
 			if (err) {
 				res.status(500)
@@ -157,15 +162,16 @@ module.exports = (app, db, strava) => {
 	//Edit a results elevation
 	app.post('/edit_result_elevation', (req, res) => {
 		let result_id = req.body.result_id
-		let new_elevation = req.body.elevation
+		let new_elevation_gain = req.body.elevation_gain
+		let new_elevation_change = req.body.elevation_change
 
-		if (!result_id || !new_elevation) {
+		if (!result_id || !new_elevation_gain || !new_elevation_change) {
 			res.status(400)
-			return res.json({"err": "please specify result_id and elevation"})
+			return res.json({"err": "please specify result_id, elevation_gain and elevation_change"})
 		}
 
 		let query = {"_id": ObjectID(result_id)}
-		let update = {"$set": {"elevation_gain": new_elevation}}
+		let update = {"$set": {"elevation_gain": new_elevation_gain, "net_elevation_change": new_elevation_change}}
 		db.collection('results').updateOne(query, update, (err, result) => {
 			if (err) {
 				res.status(500)

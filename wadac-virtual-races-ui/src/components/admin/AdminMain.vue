@@ -29,8 +29,23 @@
           :fields="warnings_fields"
           class="warnings-table">
 
-            <template v-slot:cell(elevation)="data">
-              <b-form-input :id="data.item.id" size="sm" class="warnings-input" v-model="edits[data.item.id]"></b-form-input>
+            <template v-slot:cell(elevation_gain)="data">
+              <b-form-input 
+              :id="'gain'+data.item.id" 
+              size="sm" 
+              class="warnings-input" 
+              :disabled="elevation_gain_edits[data.item.id].disabled"
+              v-model="elevation_gain_edits[data.item.id].val">
+              </b-form-input>
+            </template>
+            <template v-slot:cell(elevation_change)="data">
+              <b-form-input 
+              :id="'change'+data.item.id" 
+              size="sm" 
+              class="warnings-input" 
+              :disabled="elevation_change_edits[data.item.id].disabled"
+              v-model="elevation_change_edits[data.item.id].val">
+              </b-form-input>
             </template>
             <template v-slot:cell(resolve_btn)="data">
               <b-button variant="success" size="sm" @click="resolveElevation(data.item)">Resolve</b-button>
@@ -71,6 +86,7 @@
           <ResultsModal ref="results_modal" :wcr="modal_results_wcr" 
           :ref_distance="selected_ev_ref_distance" 
           :ref_elevation_gain="selected_ev_ref_elev_gain"
+          :ref_elevation_change="selected_ev_ref_elev_change"
           :preview_results_set="preview_results_set"></ResultsModal>
           <template v-slot:modal-footer="{ hide }">
             <b-button variant="outline-secondary" @click="hide()">
@@ -137,7 +153,7 @@ export default {
   },
   data () {
     return {
-      logged_in: false,
+      logged_in: true,
       password: '',
       events: [],
       fields: [
@@ -161,15 +177,18 @@ export default {
       modal_results_wcr: false,
       selected_ev_ref_distance: false,
       selected_ev_ref_elev_gain: false,
+      selected_ev_ref_elev_change: false,
       warnings: [],
       warnings_fields: [
         {"key": "event_name", "sortable": false},
         {"key": "athlete_name", "sortable": false},
-        {"key": "elevation", "label": "Elevation Gain (ft)", "sortable": false},
+        {"key": "elevation_gain", "label": "Elevation Gain (ft)", "sortable": false},
+        {"key": "elevation_change", "label": "Net Elevation Change (ft)", "sortable": false},
         {"key": "resolve_btn", "label": "", "sortable": false}
       ],
       full_warnings: [],
-      edits: {},
+      elevation_gain_edits: {},
+      elevation_change_edits: {},
       loading: true
     }
   },
@@ -249,8 +268,9 @@ export default {
       
     },
     resolveElevation(result) {
-      let new_val = this.edits[result.id]
-      API.updateResultElevation(result.id, new_val).then(_ => {
+      let new_elevation_gain_val = this.elevation_gain_edits[result.id].val
+      let new_elevation_change_val = this.elevation_change_edits[result.id].val
+      API.updateResultElevation(result.id, new_elevation_gain_val, new_elevation_change_val).then(_ => {
         this.warnings = []
         this.full_warnings = []
         this.getWarnings()
@@ -260,17 +280,26 @@ export default {
     },
     addNewWarning(warn) {
       let event_id = warn.event_id
-
       // Find event name
       this.full_events.forEach(ev => {
         if (ev._id == event_id) {
           let event_name = ev.event_name
           let athlete_name = warn.athlete_name
-          let elevation = warn.elevation_gain
+          let elevation_gain = warn.elevation_gain
+          let elevation_change = warn.net_elevation_change
           let id = warn._id
-          this.edits[id] = 0
+          let elev_change_disabled = true
+          if (elevation_change == null || elevation_change == "MISSING") {
+            elev_change_disabled = false
+          }
+          if (elevation_change == "MISSING") {
+            elevation_change = ""
+          }
+          this.elevation_gain_edits[id] = {"disabled": elevation_gain>0, "val": elevation_gain}
+          this.elevation_change_edits[id] = {"disabled": elev_change_disabled, "val": elevation_change}
           let resolve_btn = id
-          this.warnings.push({id, event_name, athlete_name, elevation, resolve_btn})
+          
+          this.warnings.push({id, event_name, athlete_name, elevation_gain, elevation_change, resolve_btn})
 
         }
       })
@@ -315,6 +344,7 @@ export default {
         "wcr_event": wcr_event,
         "distance": e.distance,
         "elevation_gain": e.elevation_gain,
+        "elevation_change": e.elevation_change,
         "raw_name": e.event_name,
         "raw_start": start,
         "raw_end": end,
@@ -339,7 +369,8 @@ export default {
         ev_id: e.id,
         ev_wcr: e.wcr_event,
         ev_distance: e.distance,
-        ev_elevation_gain: e.elevation_gain
+        ev_elevation_gain: e.elevation_gain,
+        ev_elevation_change: e.elevation_change
       }
 
       this.create_or_edit_title = 'Edit Event'
@@ -404,6 +435,7 @@ export default {
           this.modal_results_wcr = item.wcr_event
           this.selected_ev_ref_distance = item.distance
           this.selected_ev_ref_elev_gain = item.elevation_gain
+          this.selected_ev_ref_elev_change = item.elevation_change
           this.$nextTick(() => {
             this.$bvModal.show('results-modal')
           })
@@ -419,18 +451,26 @@ export default {
           let wcr_event = item.wcr_event
           let distance = item.distance
           let elevation_gain = item.elevation_gain
+          let elevation_change = item.elevation_change
           let headers = []
           if (wcr_event) {
             headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 
-            'adjusted_time_hms']
+            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
+            'adjusted_time_seconds', 'adjusted_time_hms'
+            ]
 
+          } else if (distance && elevation_gain && elevation_change) {
+            headers = ['start_date', 'athlete_name', 'activity_name', 
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
+            'adjusted_time_seconds', 'adjusted_time_hms'
+            ]
           } else if (distance && elevation_gain) {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 
-            'adjusted_time_hms']
+            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms'
+            ]
           } else {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
@@ -450,34 +490,54 @@ export default {
             if (wcr_event) {
               // Adjust time to match WCR stage
               let adj_obj = API.calculateAdjustedWCRTime(parseInt(r['wcr_stage']), parseFloat(r['distance']), 
-                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']))
+                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
               let adj_time = adj_obj['adj_time']
               let ref_dist = adj_obj['ref_distance']
               let ref_elev = adj_obj['ref_elevation_gain']
+              let ref_elev_change = adj_obj['ref_elevation_change']
               let hms = adj_obj['hms_str']
 
               tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
                 activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                r['net_elevation_change'], ref_dist, ref_elev, adj_time, hms])
+                r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
 
+            } else if (distance && elevation_gain && elevation_change) {
+              // Adjust time to match event
+              let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(elevation_change),
+               parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
+              let adj_time = adj_obj['adj_time']
+              let ref_dist = adj_obj['ref_distance']
+              let ref_elev = adj_obj['ref_elevation_gain']
+              let ref_elev_change = adj_obj['ref_elevation_change']
+              let hms = adj_obj['hms_str']
+
+              tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
+                r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
+                r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
             } else if (distance && elevation_gain) {
               // Adjust time to match event
-              let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(r['distance']), 
-                parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
+              let adj_obj = API.calculateAdjustedTimeOLD(parseFloat(distance), parseFloat(elevation_gain),
+               parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
               let adj_time = adj_obj['adj_time']
               let ref_dist = adj_obj['ref_distance']
               let ref_elev = adj_obj['ref_elevation_gain']
               let hms = adj_obj['hms_str']
 
               tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
-                r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                r['net_elevation_change'], ref_dist, ref_elev, adj_time, hms])
+                r['moving_time'], r['elapsed_time'], r['elevation_gain'], ref_dist, 
+                ref_elev, adj_time, hms])
             } else {
               tmp_csv.push([start_date, r['athlete_name'], activity_name, 
                 r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
             }
           })
           if (wcr_event) {
+            // Sort by adjusted time
+            tmp_csv.sort( function( a, b ) {
+              if ( a[13] == b[13] ) return 0;
+              return a[13] < b[13] ? -1 : 1;
+            });
+          } else if (distance && elevation_gain && elevation_change) {
             // Sort by adjusted time
             tmp_csv.sort( function( a, b ) {
               if ( a[11] == b[11] ) return 0;
