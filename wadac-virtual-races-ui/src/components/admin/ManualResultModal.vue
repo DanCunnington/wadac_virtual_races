@@ -153,20 +153,19 @@ export default {
       }
     },
     selected_event: function() {
-      if (this.selected_event) {
-        this.event_state = null
-        let e = this.full_events[this.selected_event]
-        if (Object.keys(e).indexOf('wcr_event') > -1) {
-          this.selected_event_wcr = e.wcr_event
-        } else {
-          this.selected_event_wcr = false
-        }
-        
-        let start = new Date(e.start_time)
-        let end = new Date(e.end_time)
-        this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
-        this.err_notification = '' 
+      this.event_state = null
+      let e = this.full_events[this.selected_event]
+      if (Object.keys(e).indexOf('wcr_event') > -1) {
+        this.selected_event_wcr = e.wcr_event
+      } else {
+        this.selected_event_wcr = false
       }
+      
+      let start = new Date(e.start_time)
+      let end = new Date(e.end_time)
+      this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
+      this.err_notification = '' 
+      
     },
     selected_team: function(val) {
       if (val) {
