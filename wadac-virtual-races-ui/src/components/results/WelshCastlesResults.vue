@@ -23,10 +23,16 @@
         </div>
         <div class="stage-results col-lg-7">
           <h5 class="wcr-team-head">Stage Results</h5>
+          <p class="sm-it">The following results have been scaled to the corresponding 2019 Welsh Castles stage</p>
           <div class="stage-select-container">
             <b-form-select v-model="selected_stage" :options="wcr_stages" required></b-form-select>
             <div v-if="selected_stage">
               <div v-if="!stage_results_missing">
+                <div class="event-stats">
+                  <p><span class="stat-label">Distance:</span> <span class="ref-distance">{{selected_stage_distance}}</span> mi</p>
+                  <p><span class="stat-label">Elevation Gain:</span> <span class="ref-distance">{{selected_stage_elevation_gain}}</span> ft</p>
+                  <p><span class="stat-label">Net Elevation Change:</span> <span class="ref-distance">{{selected_stage_elevation_change}}</span> ft</p>
+                </div>
                 <b-table striped hover sticky-header bordered
                   :fields="stage_fields"
                   :items="wcr_selected_stage_results"
@@ -72,7 +78,11 @@ export default {
       wcr_selected_stage_results: [],
       wcr_stages: [],
       selected_stage: null,
+      selected_stage_distance: null,
+      selected_stage_elevation_gain: null,
+      selected_stage_elevation_change: null,
       wcr_team_values_to_display: {},
+      wcr_stage_stats_to_select: {},
       stage_results_missing: true
     }
   },
@@ -132,6 +142,19 @@ export default {
         this.wcr_team_values_to_display[t['value']] = {"short": t['short'], "full":t['text']}
       })
 
+      // Build dict for quick stage reference display
+      this.wcr_stages.forEach(day => {
+        if (!day.disabled) {
+          day.options.forEach(s => {
+            this.wcr_stage_stats_to_select[s.value] = {
+              "ref_distance": s.ref_distance,
+              "ref_elevation_gain": s.ref_elevation_gain,
+              "ref_elevation_change": s.ref_elevation_change
+            }
+          })
+        }
+      })
+
     },
     calculateAndUpdateTeamResults() {
       this.wcr_teams.forEach(t => {
@@ -159,6 +182,13 @@ export default {
     showStageResults() {
       let sr = this.wcr_all_results_by_stage[this.selected_stage]
       this.wcr_selected_stage_results = []
+
+      //show stats
+      let ss = this.wcr_stage_stats_to_select[this.selected_stage]
+      console.log(this.wcr_stage_stats_to_select)
+      this.selected_stage_distance = ss.ref_distance
+      this.selected_stage_elevation_change = ss.ref_elevation_change
+      this.selected_stage_elevation_gain = ss.ref_elevation_gain
 
       if (sr) {
         this.stage_results_missing = false
@@ -204,10 +234,6 @@ export default {
   margin-bottom: 20px;
  }
 
- .wcr-stage-table {
-  margin-top: 30px;
- }
-
  p.sm-it {
   margin-top: 20px;
   font-style: italic;
@@ -236,11 +262,23 @@ export default {
     height: 100%;
   }
 
+  p.net-chng {
+    margin: 0 auto;
+    max-width: 100%;
+  }
 
+  .event-stats {
+    display: flex;
+    margin: 0 auto;
+    justify-content: space-between;
+    font-style: italic;
+    font-size: small;
+    margin-top: 20px;
+  }
 
-
-
-  
+  .stat-label {
+    font-weight: bold;
+  }
 
 </style>
 
