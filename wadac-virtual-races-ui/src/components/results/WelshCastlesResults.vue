@@ -225,11 +225,6 @@ export default {
   margin-bottom: 60px;
  }
 
- .stage-select-container {
-  max-width: 80%;
-  margin: 0 auto;
- }
-
  h5.wcr-team-head {
   margin-bottom: 20px;
  }
@@ -238,6 +233,13 @@ export default {
   margin-top: 20px;
   font-style: italic;
   font-size: small;
+ }
+
+ @media (min-width: 992px) { 
+  .stage-select-container {
+    max-width: 80%;
+    margin: 0 auto;
+  }
  }
 
  @media (max-width: 992px) { 
