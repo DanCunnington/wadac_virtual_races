@@ -1,6 +1,7 @@
 <template>
   <div class="results">
     <h1 @click="$router.push('/')" class="hover-cursor">WADAC Virtual Racing</h1>
+    <p class="submit-link" @click="$router.push('/')">Submit Result</p>
     <h3 class="results-head">Provisional Results</h3>
     <div class="event-select-container" v-if="!loading">
       <div class="row">
@@ -195,6 +196,15 @@ export default {
     margin: 0 auto;
     max-width: 100%;
     margin-bottom: 20px;
+  }
+
+  .submit-link {
+    color: blue;
+    text-decoration: underline;
+  }
+
+  .submit-link:hover {
+    cursor: pointer;
   }
   
 
