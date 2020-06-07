@@ -80,6 +80,25 @@ export default {
   methods: {
     initialise() {
       this.getActiveEvents().then(_ => {
+
+        // Get WCR events
+        API.getWCREvents().then(response => {
+          if (Object.keys(response).indexOf('err') > -1) {
+            console.log(response.err)
+          } else {
+            // get existing ids
+            let existing_ids = []
+            this.full_events.forEach(fe => {
+              existing_ids.push(fe._id)
+            })
+            response.data.forEach((ev, idx) => {
+              if (existing_ids.indexOf(ev._id) == -1) {
+                this.events.push({"value": idx, "text": ev.event_name})
+                this.full_events.push(ev)
+              }
+            })
+          }
+        })
         this.loading = false
       })
     },

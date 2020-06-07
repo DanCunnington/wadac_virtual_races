@@ -116,6 +116,19 @@ module.exports = (app, db) => {
 		})
 	})
 
+	app.get('/wcr_events', (req, res) => {
+		// Get wcr events from the database 
+		let query = { "wcr_event": { $eq: true }}
+		db.collection('events').find(query).toArray((err, result) => {
+			if (err) {
+				res.status(500)
+				return res.json({"err": JSON.stringify(err)})
+			} else {
+				res.json(result)
+			}
+		})
+	})
+
 	app.get('/all_events', (req, res) => {
 		// Get all events from the database 
 		db.collection('events').find({}).toArray((err, result) => {

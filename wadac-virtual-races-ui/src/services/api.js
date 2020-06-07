@@ -44,6 +44,10 @@ export default {
         return Vue.prototype.$http.get(server_url+'/active_events')
     },
 
+    getWCREvents() {
+        return Vue.prototype.$http.get(server_url+'/wcr_events')
+    },
+
     getAllEvents() {
         return Vue.prototype.$http.get(server_url+'/all_events')
     },
@@ -104,9 +108,6 @@ export default {
         return [
             { value: null, text: 'Please select a team', disabled: true }, 
             { value: 'lc1', text: 'Les Croupiers Team 1', short: 'LECR 1'},
-            { value: 'lc2', text: 'Les Croupiers Team 2', short: 'LECR 2'},
-            { value: 'lc3', text: 'Les Croupiers Team 3', short: 'LECR 3'},
-            { value: 'lc4', text: 'Les Croupiers Team 4', short: 'LECR 4'},
             { value: 'li1', text: 'Lliswerry Team 1', short: 'LISW 1'}, 
             { value: 'li2', text: 'Lliswerry Team 2', short: 'LISW 2'}, 
             { value: 'li3', text: 'Lliswerry Team 3', short: 'LISW 3'}, 
