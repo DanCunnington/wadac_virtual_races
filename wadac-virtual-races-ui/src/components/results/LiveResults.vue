@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     initialise() {
-      this.getActiveEvents().then(_ => {
+      this.getActiveEvents().then(prev_length => {
 
         // Get WCR events
         API.getWCREvents().then(response => {
@@ -93,7 +93,8 @@ export default {
             })
             response.data.forEach((ev, idx) => {
               if (existing_ids.indexOf(ev._id) == -1) {
-                this.events.push({"value": idx, "text": ev.event_name})
+                let incrementer = idx + 1
+                this.events.push({"value": (prev_length - 1)+incrementer, "text": ev.event_name})
                 this.full_events.push(ev)
               }
             })
@@ -114,7 +115,7 @@ export default {
             response.data.forEach((ev, idx) => {
               this.events.push({"value": idx, "text": ev.event_name})
             })
-            resolve()
+            resolve(this.full_events.length)
           }
         })
       })
