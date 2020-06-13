@@ -4,7 +4,7 @@ import Router from '../router';
 // Dev or Prod
 let server_url = 'http://localhost:3000'
 if (process.env.NODE_ENV == 'production') {
-    server_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
+    server_url = 'https://ppp-results.eu-gb.mybluemix.net/'
 } 
     
 export default {
