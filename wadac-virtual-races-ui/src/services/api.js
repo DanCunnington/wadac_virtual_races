@@ -71,8 +71,9 @@ export default {
                 return resolve(response)
             }, err => {
                 // If access token is invalid, deauthorise
-                console.log(err)
-                this.clearCookie()
+                // console.log(err)
+                // this.clearCookie()
+                return reject(err)
             })  
         })
     },

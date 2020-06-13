@@ -11,6 +11,12 @@
             <input type="text" class="form-control" id="athlete-name" v-model="cookie.user_name" :disabled=true>
           </div>
         </div>
+        <div class="form-group row">
+          <label for="athlete-email" class="col-sm-3 col-form-label">Email</label>
+          <div class="col-sm-9">
+            <input type="email" class="form-control" id="athlete-email" v-model="email" required>
+          </div>
+        </div>
         <div v-if="!loading">
           <div class="form-group row">
             <label for="event" class="col-sm-3 col-form-label">Event</label>
@@ -75,7 +81,10 @@
       </form>
     </div>
     <div v-else>
-      <p>Thank you, your result has been saved.</p>
+      <div class="done-msgs">
+        <p>Thank you, your result has been saved.</p>
+        <p class="retry" @click="$router.go()">Submit another result?</p>
+      </div>
     </div>
     
   </div>
@@ -97,6 +106,7 @@ export default {
       selected_activity: null,
       selected_team: null,
       selected_stage: null,
+      email: null,
       events: [{ value: null, text: 'Please select an event', disabled: true }],
       activities: [],
       full_activities: [],
@@ -137,6 +147,10 @@ export default {
   },
   methods: {
     initialise() {
+      // Set email address
+      if (Object.keys(this.cookie).indexOf('email') > -1) {
+        this.email = this.cookie.email
+      }
       // Get active events
       this.getActiveEvents().then(_ => {
         // Get activities
@@ -174,12 +188,12 @@ export default {
             let full_activities = []
             let backup_activities = []
             response.data.forEach((ac, idx) => {
-              if (ac.type == 'Run') {
-                full_activities.push(ac)
-                backup_activities.push(ac)
-                let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
-                this.activities.push({"value": idx, "html": html_str})
-              }
+              // if (ac.type == 'Run') {
+              full_activities.push(ac)
+              backup_activities.push(ac)
+              let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
+              this.activities.push({"value": idx, "html": html_str})
+              // }
             })
             this.full_activities = full_activities
             this.backup_activities = backup_activities
@@ -231,7 +245,9 @@ export default {
       let new_result = {
         "event_id": selected_event._id,
         "athlete_name": this.cookie.user_name,
+        "athlete_email": this.email,
         "activity_id": selected_acc.id,
+        "activity_type": selected_acc.type,
         "activity_name": selected_acc.name,
         "start_date": selected_acc.start_date_local,
         "elapsed_time": selected_acc.elapsed_time,
@@ -254,6 +270,8 @@ export default {
             this.submit_disabled = false
           } else {
             // Done
+            this.cookie.email = this.email
+            this.$cookie.set('ppp_virtual_races', JSON.stringify(this.cookie), 30)
             this.submitted = true
             this.err_notification = ''
             this.submit_disabled = false
@@ -319,6 +337,15 @@ export default {
     margin-bottom: 0px;
   }
 
+  p.retry {
+    text-decoration: underline;
+    color: blue;
+  }
+
+  p.retry:hover {
+    cursor: pointer;
+  }
+
   p.err_notification {
     color: red;
   }
@@ -333,4 +360,7 @@ export default {
     display: inline-flex;
   }
 
+  .done-msgs {
+    text-align: center;
+  }
 </style>

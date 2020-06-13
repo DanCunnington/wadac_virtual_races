@@ -1,4 +1,4 @@
 applications:
-- name: wadac-virtual-races
-  host: wadac-virtual-races
+- name: ppp-results
+  host: ppp-results
   memory: 128M

@@ -20,7 +20,7 @@
                 <b-form-datepicker id="end-datepicker" v-model="ev_end_date" :state="end_state" class="mb-2"></b-form-datepicker>
             </div>
         </div>
-        <div class="form-group row">
+        <!-- <div class="form-group row">
             <label for="wcr-check" class="col-sm-5 col-form-label">Welsh Castles Event?</label>
             <div class="col-sm-4 wcr-switch">
               <b-form-checkbox
@@ -31,8 +31,8 @@
                 size="lg"
               ></b-form-checkbox>
             </div>
-        </div>
-        <div v-if="!wcr_event">
+        </div> -->
+    <!--     <div v-if="!wcr_event">
           <div class="form-group row">
             <label for="distance" class="col-sm-6 col-form-label">Event Distance (mi)</label>
             <div class="col-sm-6">
@@ -51,7 +51,7 @@
               <b-form-input id="elevation_change" :state="ec_state" v-model="ev_elevation_change"></b-form-input>
             </div>
           </div>
-        </div>
+        </div> -->
      </form>
   </div>
 </template>
@@ -124,10 +124,7 @@ export default {
         this.ev_name = this.existing.ev_name
         this.ev_start_date = this.existing.ev_start_date
         this.ev_end_date = this.existing.ev_end_date
-        this.wcr_event = this.existing.ev_wcr
-        this.ev_distance = this.existing.ev_distance
-        this.ev_elevation_gain = this.existing.ev_elevation_gain
-        this.ev_elevation_change = this.existing.ev_elevation_change
+        this.wcr_event = false
       }
     },
     validateEvent() {
@@ -171,47 +168,47 @@ export default {
           return reject()
         }
 
-        if (!this.wcr_event) {
-          if (!this.ev_distance) {
-            this.notification = 'Please enter an event distance in miles'
-            this.distance_state = false
-            setTimeout(() => {
-                this.notification = ''
-            }, 2000)
-            return reject()
-          }
+        // if (!this.wcr_event) {
+        //   if (!this.ev_distance) {
+        //     this.notification = 'Please enter an event distance in miles'
+        //     this.distance_state = false
+        //     setTimeout(() => {
+        //         this.notification = ''
+        //     }, 2000)
+        //     return reject()
+        //   }
 
-          if (!this.ev_elevation_gain) {
-            this.notification = 'Please enter an event elevation gain in feet'
-            this.eg_state = false
-            setTimeout(() => {
-                this.notification = ''
-            }, 2000)
-            return reject()
-          }
+        //   if (!this.ev_elevation_gain) {
+        //     this.notification = 'Please enter an event elevation gain in feet'
+        //     this.eg_state = false
+        //     setTimeout(() => {
+        //         this.notification = ''
+        //     }, 2000)
+        //     return reject()
+        //   }
 
-          if (!this.ev_elevation_change) {
-            this.notification = 'Please enter a net event elevation change in feet'
-            this.ec_state = false
-            setTimeout(() => {
-                this.notification = ''
-            }, 2000)
-            return reject()
-          }
-        }
+        //   if (!this.ev_elevation_change) {
+        //     this.notification = 'Please enter a net event elevation change in feet'
+        //     this.ec_state = false
+        //     setTimeout(() => {
+        //         this.notification = ''
+        //     }, 2000)
+        //     return reject()
+        //   }
+        // }
 
         let new_event = {
             "name": this.ev_name,
             "start_time": start_date,
             "end_time": end_date,
-            "wcr_event": this.wcr_event
+            "wcr_event": false
         }
 
-        if (!this.wcr_event) {
-          new_event.distance = this.ev_distance
-          new_event.elevation_gain = this.ev_elevation_gain
-          new_event.elevation_change = this.ev_elevation_change
-        }
+        // if (!this.wcr_event) {
+        //   new_event.distance = this.ev_distance
+        //   new_event.elevation_gain = this.ev_elevation_gain
+        //   new_event.elevation_change = this.ev_elevation_change
+        // }
         resolve(new_event)
       })
     },

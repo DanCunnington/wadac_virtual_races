@@ -1,17 +1,17 @@
 <template>
   <div class="hello">
-    <h1>WADAC Virtual Racing</h1>
+    <h1>Winchester PPP Results Submission</h1>
     <div class="content">
-      <p class="results-link" @click="$router.push('/results')">Provisional Results</p>
-      <div v-if="!refreshing">
-        <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted && !loading">Hi there. Welcome to the WADAC virtual racing results submission tool. Please choose one of the following options:</p>
+<!--       <p class="results-link" @click="$router.push('/results')">Provisional Results</p>
+ -->      <div v-if="!refreshing">
+        <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted && !loading">Hi there. Welcome to the Pedal, Paddle, Pace (PPP) virtual racing results submission tool. Please sign in with Strava using the button below.</p>
 
         <div v-if="!manual_submission_submitted && !loading" class="submission-container">
           <div class="strava-option">
-            <h4 class="welcome-heading" v-if="!cookie.access_token && !loading">1) Strava (Easiest)</h4>
-            <p class="submit-instructions" v-if="!cookie.access_token && !loading">If you have a Strava account, select from one of your activities using the button below.</p> 
+            <!-- <h4 class="welcome-heading" v-if="!cookie.access_token && !loading">1) Strava (Easiest)</h4> -->
+            <!-- <p class="submit-instructions" v-if="!cookie.access_token && !loading">If you have a Strava account, select from one of your activities using the button below.</p>  -->
 
-            <p class="submit-instructions strava" v-if="!cookie.access_token && !loading">Note: This application requires access to your activities. The activity name, start time, distance, elapsed time, moving time, elevation gain and net elevation of the activity you choose to submit will be stored.</p>
+            <p class="submit-instructions strava" v-if="!cookie.access_token && !loading">Note: This application requires access to your activities. The activity name, activity type, start time, distance, elapsed time, moving time, elevation gain and net elevation of the activity you choose to submit will be stored.</p>
             <img v-if="!cookie.access_token && !loading" class="strava" height="48px" src="../assets/btn_strava_connectwith_orange@2x.png" @click="directToStrava()"/>
             <p v-if="loading">Loading...</p>
             <div v-if="cookie.access_token && !loading">
@@ -22,14 +22,14 @@
             </div>
           </div>
 
-          <div class="manual-option" v-if="!cookie.access_token && !loading">
+          <!-- <div class="manual-option" v-if="!cookie.access_token && !loading">
             <b-modal id="manual-upload-modal" :ok-title="'Submit'" :title="'Manual Result Submission'" @ok="handleManualResultOk">
               <ManualResultModal ref="mr_modal_main" :events_type="'active'"></ManualResultModal>
             </b-modal>
 
             <h4 class="welcome-heading">2) Manual Submission</h4>
             <p class="submit-instructions">Alternatively, if you don't have a Strava account, you can submit your result manually by clicking <span class="manual-upload" @click="manualUpload">here</span>.</p> 
-          </div>
+          </div> -->
         </div>
         <div v-else>
           <p v-if="!loading" class="manual-ok">Thank you, your manual result submission has been saved.</p>
@@ -88,7 +88,7 @@ export default {
         this.strava_client_id = response.data.client_id
         
         // Check if access token cookie exists
-        let cookie = JSON.parse(this.$cookie.get('wadac_virtual_races'));
+        let cookie = JSON.parse(this.$cookie.get('ppp_virtual_races'));
         if (cookie && cookie != "undefined") {
           if (!this.cookieExpired(cookie)) {
             this.cookie = cookie
@@ -126,7 +126,7 @@ export default {
     },
     deauthorise() {
       this.cookie = {access_token: false}
-      this.$cookie.delete('wadac_virtual_races');
+      this.$cookie.delete('ppp_virtual_races');
       // Route to homepage
       let query_params = this.$route.query
       this.loading = false
@@ -157,7 +157,7 @@ export default {
             "user_name": user_name,
             "expires_at": response.data.expires_at
           }
-          this.$cookie.set('wadac_virtual_races', JSON.stringify(new_cookie), 30)
+          this.$cookie.set('ppp_virtual_races', JSON.stringify(new_cookie), 30)
           this.cookie = new_cookie
           this.loading = false
           console.log('refreshed')
@@ -180,7 +180,7 @@ export default {
             "user_name": response.data.user_name,
             "expires_at": response.data.expires_at
           }
-          this.$cookie.set('wadac_virtual_races', JSON.stringify(cookie), 30)
+          this.$cookie.set('ppp_virtual_races', JSON.stringify(cookie), 30)
           this.cookie = cookie
           this.loading = false
           this.$router.push('/') 

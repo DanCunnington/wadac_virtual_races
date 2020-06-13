@@ -1,6 +1,6 @@
 <template>
   <div class="admin">
-    <h1 @click="$router.push('/')" class="hover-cursor">WADAC Virtual Racing</h1>
+    <h1 @click="$router.push('/')" class="hover-cursor">PPP Results Submission</h1>
     <p>Admin Page</p>
     <div class="form-container">
         <form @submit.prevent="login" v-if="!logged_in">
@@ -59,7 +59,7 @@
         <h4>Events</h4>
         <div class="admin-btn-container">
           <b-button v-b-modal.modal-1 class="pull-left" variant="primary" @click="resetModalText">Create Event</b-button>
-          <b-button v-b-modal.modal-2 class="pull-left mr-btn" variant="outline-primary" @click="">Manual Result Submission</b-button>
+          <!-- <b-button v-b-modal.modal-2 class="pull-left mr-btn" variant="outline-primary" @click="">Manual Result Submission</b-button> -->
         </div>
         <b-modal id="modal-1" :ok-title="create_or_edit_button" :title="create_or_edit_title" @ok="handleOk">
           <EventModal ref="event_modal" :existing="existing"></EventModal>
@@ -430,6 +430,7 @@ export default {
           console.log(response.err)
         } else {
           this.preview_results_set = response.data
+          console.log(this.preview_results_set)
           let name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
           this.modal_results_title = `${name} Results Preview`
           this.modal_results_wcr = item.wcr_event
@@ -452,29 +453,31 @@ export default {
           let distance = item.distance
           let elevation_gain = item.elevation_gain
           let elevation_change = item.elevation_change
-          let headers = []
-          if (wcr_event) {
-            headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
+          let headers = ['start_date', 'athlete_name', 'athlete_email', 'activity_name', 'activity_type',
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
-            'adjusted_time_seconds', 'adjusted_time_hms'
-            ]
+            'net_elevation_change_ft']
+          // if (wcr_event) {
+          //   headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
+          //   'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+          //   'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
+          //   'adjusted_time_seconds', 'adjusted_time_hms'
+          //   ]
 
-          } else if (distance && elevation_gain && elevation_change) {
-            headers = ['start_date', 'athlete_name', 'activity_name', 
-            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
-            'adjusted_time_seconds', 'adjusted_time_hms'
-            ]
-          } else if (distance && elevation_gain) {
-            headers = ['start_date', 'athlete_name', 'activity_name', 
-            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms'
-            ]
-          } else {
-            headers = ['start_date', 'athlete_name', 'activity_name', 
-            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
-          }
+          // } else if (distance && elevation_gain && elevation_change) {
+          //   headers = ['start_date', 'athlete_name', 'athlete_email', 'activity_name', 'activity_type',
+          //   'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+          //   'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
+          //   'adjusted_time_seconds', 'adjusted_time_hms'
+          //   ]
+          // } else if (distance && elevation_gain) {
+          //   headers = ['start_date', 'athlete_name', 'activity_name', 
+          //   'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+          //   'ref_distance', 'ref_elevation_gain', 'adjusted_time_seconds', 'adjusted_time_hms'
+          //   ]
+          // } else {
+          //   headers = ['start_date', 'athlete_name', 'activity_name', 
+          //   'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft']
+          // }
             
           // Download the results as csv
           let tmp_csv = [headers]
@@ -487,69 +490,71 @@ export default {
             if (Object.keys(r).indexOf('start_date') > -1) {
                 start_date = r['start_date']
             }
-            if (wcr_event) {
-              // Adjust time to match WCR stage
-              let adj_obj = API.calculateAdjustedWCRTime(parseInt(r['wcr_stage']), parseFloat(r['distance']), 
-                parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
-              let adj_time = adj_obj['adj_time']
-              let ref_dist = adj_obj['ref_distance']
-              let ref_elev = adj_obj['ref_elevation_gain']
-              let ref_elev_change = adj_obj['ref_elevation_change']
-              let hms = adj_obj['hms_str']
+            tmp_csv.push([start_date, r['athlete_name'], r['athlete_email'], activity_name, r['activity_type'],
+                r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], r['net_elevation_change']])
+            // if (wcr_event) {
+            //   // Adjust time to match WCR stage
+            //   let adj_obj = API.calculateAdjustedWCRTime(parseInt(r['wcr_stage']), parseFloat(r['distance']), 
+            //     parseFloat(r['elapsed_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
+            //   let adj_time = adj_obj['adj_time']
+            //   let ref_dist = adj_obj['ref_distance']
+            //   let ref_elev = adj_obj['ref_elevation_gain']
+            //   let ref_elev_change = adj_obj['ref_elevation_change']
+            //   let hms = adj_obj['hms_str']
 
-              tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
-                activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
+            //   tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
+            //     activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
+            //     r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
 
-            } else if (distance && elevation_gain && elevation_change) {
-              // Adjust time to match event
-              let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(elevation_change),
-               parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
-              let adj_time = adj_obj['adj_time']
-              let ref_dist = adj_obj['ref_distance']
-              let ref_elev = adj_obj['ref_elevation_gain']
-              let ref_elev_change = adj_obj['ref_elevation_change']
-              let hms = adj_obj['hms_str']
+            // } else if (distance && elevation_gain && elevation_change) {
+            //   // Adjust time to match event
+            //   // let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(elevation_change),
+            //   //  parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
+            //   // let adj_time = adj_obj['adj_time']
+            //   // let ref_dist = adj_obj['ref_distance']
+            //   // let ref_elev = adj_obj['ref_elevation_gain']
+            //   // let ref_elev_change = adj_obj['ref_elevation_change']
+            //   // let hms = adj_obj['hms_str']
 
-              tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
-                r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
-            } else if (distance && elevation_gain) {
-              // Adjust time to match event
-              let adj_obj = API.calculateAdjustedTimeOLD(parseFloat(distance), parseFloat(elevation_gain),
-               parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
-              let adj_time = adj_obj['adj_time']
-              let ref_dist = adj_obj['ref_distance']
-              let ref_elev = adj_obj['ref_elevation_gain']
-              let hms = adj_obj['hms_str']
+            //   tmp_csv.push([start_date, r['athlete_name'], r['athlete_email'], activity_name, r['activity_type'], r['distance'], 
+            //     r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
+            //     r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
+            // } else if (distance && elevation_gain) {
+            //   // Adjust time to match event
+            //   let adj_obj = API.calculateAdjustedTimeOLD(parseFloat(distance), parseFloat(elevation_gain),
+            //    parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']))
+            //   let adj_time = adj_obj['adj_time']
+            //   let ref_dist = adj_obj['ref_distance']
+            //   let ref_elev = adj_obj['ref_elevation_gain']
+            //   let hms = adj_obj['hms_str']
 
-              tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
-                r['moving_time'], r['elapsed_time'], r['elevation_gain'], ref_dist, 
-                ref_elev, adj_time, hms])
-            } else {
-              tmp_csv.push([start_date, r['athlete_name'], activity_name, 
-                r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
-            }
+            //   tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
+            //     r['moving_time'], r['elapsed_time'], r['elevation_gain'], ref_dist, 
+            //     ref_elev, adj_time, hms])
+            // } else {
+            //   tmp_csv.push([start_date, r['athlete_name'], activity_name, 
+            //     r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain']])
+            // }
           })
-          if (wcr_event) {
-            // Sort by adjusted time
-            tmp_csv.sort( function( a, b ) {
-              if ( a[13] == b[13] ) return 0;
-              return a[13] < b[13] ? -1 : 1;
-            });
-          } else if (distance && elevation_gain && elevation_change) {
-            // Sort by adjusted time
-            tmp_csv.sort( function( a, b ) {
-              if ( a[11] == b[11] ) return 0;
-              return a[11] < b[11] ? -1 : 1;
-            });
-          } else if (distance && elevation_gain) {
-            // Sort by adjusted time
-            tmp_csv.sort( function( a, b ) {
-              if ( a[9] == b[9] ) return 0;
-              return a[9] < b[9] ? -1 : 1;
-            });
-          }
+          // if (wcr_event) {
+          //   // Sort by adjusted time
+          //   tmp_csv.sort( function( a, b ) {
+          //     if ( a[13] == b[13] ) return 0;
+          //     return a[13] < b[13] ? -1 : 1;
+          //   });
+          // } else if (distance && elevation_gain && elevation_change) {
+          //   // Sort by adjusted time
+          //   tmp_csv.sort( function( a, b ) {
+          //     if ( a[11] == b[11] ) return 0;
+          //     return a[11] < b[11] ? -1 : 1;
+          //   });
+          // } else if (distance && elevation_gain) {
+          //   // Sort by adjusted time
+          //   tmp_csv.sort( function( a, b ) {
+          //     if ( a[9] == b[9] ) return 0;
+          //     return a[9] < b[9] ? -1 : 1;
+          //   });
+          // }
           
           let csvContent = tmp_csv.map(e => e.join(",")).join("\n");
           var download = function(content, fileName, mimeType) {

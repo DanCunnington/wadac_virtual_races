@@ -9,7 +9,7 @@
     export default {
         name: 'app',
         created () {
-            document.title = "WADAC Virtual Racing";
+            document.title = "PPP Results Submission";
         }
     }
 </script>

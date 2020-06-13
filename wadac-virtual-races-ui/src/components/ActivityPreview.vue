@@ -2,6 +2,7 @@
   <div class="activity">
     <h4 class="activity_name">{{activity.name}}</h4>
     <p class="date">{{date_str}}</p>
+    <p class="date mrg">{{activity.type}}</p>
     <ul class="list-stats">
       <li class="stat">
         <div class="stat-subtext">Distance</div>
@@ -148,6 +149,10 @@ export default {
 
   p.date {
     font-size: smaller;
+    margin-bottom: 0;
+  }
+  p.mrg {
+    margin-bottom: 16px;
   }
 
   h4.activity_name {
