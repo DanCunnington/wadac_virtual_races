@@ -80,7 +80,7 @@ export default {
       if (process.env.NODE_ENV == 'development') {
         this.callback_url = 'http://localhost:8080'
       } else if (process.env.NODE_ENV == 'production') {
-        this.callback_url = 'https://wadac-virtual-races.eu-gb.mybluemix.net'
+        this.callback_url = 'https://ppp-results.eu-gb.mybluemix.net'
       }
 
       // Get client ID
