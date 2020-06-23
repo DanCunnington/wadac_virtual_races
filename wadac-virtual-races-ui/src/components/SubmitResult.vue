@@ -17,6 +17,20 @@
             <input type="email" class="form-control" id="athlete-email" v-model="email" required>
           </div>
         </div>
+        <div class="form-group row">
+          <label for="checkbox-1" class="col-sm-3 col-form-label">Email Consent</label>
+          <div class="col-sm-9">
+            <b-form-checkbox
+              id="checkbox-1"
+              v-model="email_consent"
+              name="checkbox-1"
+              value="yes"
+              unchecked-value="no"
+            >
+              By submitting this form you consent to us using your email address to provide you with information about the event you are entering. Please let us know if you are happy to hear from us about future PPP events by email by clicking this checkbox. We promise to keep your details safe and never sell or swap them with anyone. If you don’t want to hear from us, or change your mind about how we contact you, email <a class="mailto" href="mailto:info@winchesterppp.co.uk">info@winchesterppp.co.uk</a>
+            </b-form-checkbox>
+          </div>
+        </div>
         <div v-if="!loading">
           <div class="form-group row">
             <label for="event" class="col-sm-3 col-form-label">Event</label>
@@ -107,6 +121,7 @@ export default {
       selected_team: null,
       selected_stage: null,
       email: null,
+      email_consent: 'no',
       events: [{ value: null, text: 'Please select an event', disabled: true }],
       activities: [],
       full_activities: [],
@@ -233,7 +248,7 @@ export default {
       }
     },
     handleGenericSubmitError() {
-      this.err_notification = 'Error submitting results. Please contact Dan Cunnington.'
+      this.err_notification = 'Error submitting results. Please contact info@winchesterppp.co.uk.'
     },
     handleZeroActivityError() {
       this.err_notification = 'You have tried to submit an activity with 0 miles or 0 seconds. Please submit another activity.'
@@ -246,6 +261,7 @@ export default {
         "event_id": selected_event._id,
         "athlete_name": this.cookie.user_name,
         "athlete_email": this.email,
+        "athlete_email_consent": this.email_consent,
         "activity_id": selected_acc.id,
         "activity_type": selected_acc.type,
         "activity_name": selected_acc.name,

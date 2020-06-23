@@ -2,7 +2,7 @@
   <div class="home">
     <Main/>
     <p class="footer">
-  	If you experience any problems, please contact <a class="mailto" href="mailto:dancunnington@hotmail.co.uk">Dan Cunnington</a>.
+  	If you experience any problems, please contact <a class="mailto" href="info@winchesterppp.co.uk">info@winchesterppp.co.uk</a>. Macmillan really needs your support right now. A suggested donation of £5 would make a big difference. Please use our official fundraising page at <a class="mailto" href="https://www.justgiving.com/fundraising/pppvolunteers2020" target="_blank">PPP Macmillan Donation</a> or set up you own page on <a class="mailto" href="https://www.justgiving.com/start-fundraising" target="_blank">JustGiving</a>. Search for Macmillan, then click on ‘Taking part in an event’ and the PPP will be on the first page. Thank you.
   	</p>
   </div>
 
@@ -31,6 +31,8 @@ export default {
 		margin-bottom: 20px;
 	 	text-align: center;
 	 	font-size: smaller;
+	 	margin: 0 auto;
+  		max-width: 520px;
 	}
 	a.mailto {
 	 	color: blue !important;

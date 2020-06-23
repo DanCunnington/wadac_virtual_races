@@ -8,6 +8,7 @@ module.exports = (app, db, strava) => {
 		let event_id = new_result.event_id
 		let athlete_name = new_result.athlete_name
 		let athlete_email = new_result.athlete_email
+		let athlete_email_consent = new_result.athlete_email_consent
 		let activity_name = new_result.activity_name
 		let activity_type = new_result.activity_type
 		let activity_id = new_result.activity_id
@@ -23,10 +24,10 @@ module.exports = (app, db, strava) => {
 		let team = new_result.wcr_team
 		let stage = new_result.wcr_stage
 
-		if (!event_id || !activity_name || !activity_type || !athlete_email || !activity_id || !start_date || !athlete_name || 
+		if (!event_id || !activity_name || !activity_type || !athlete_email || !athlete_email_consent || !activity_id || !start_date || !athlete_name || 
 			!elapsed_time || !moving_time || ! elevation_gain || !distance) {
 			res.status(400)
-			return res.json({"err": "please specify event_id, athlete_name, activity_type, athlete_email, activity_id, "+
+			return res.json({"err": "please specify event_id, athlete_name, activity_type, athlete_email, athlete_email_consent, activity_id, "+
 				"activity_name, start_date, elapsed_time, moving_time, elevation_gain and distance"})
 		}
 
@@ -71,7 +72,7 @@ module.exports = (app, db, strava) => {
 		// Insert function
 		let insertResultToDb = function(net_elevation_change) {
 			// Insert to database			
-			let result = {event_id, athlete_name, athlete_email, activity_id, activity_name, 
+			let result = {event_id, athlete_name, athlete_email, athlete_email_consent, activity_id, activity_name, 
 				activity_type, start_date, elapsed_time, moving_time, elevation_gain, distance}
 
 			if (net_elevation_change) {

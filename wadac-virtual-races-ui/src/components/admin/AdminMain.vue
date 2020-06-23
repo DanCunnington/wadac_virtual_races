@@ -21,7 +21,7 @@
       <div class="text-left">
 
         <!-- Warnings -->
-        <div class="warnings" v-if="warnings.length > 0">
+        <!-- <div class="warnings" v-if="warnings.length > 0">
           <h4>Actions</h4>
           <p>The following results contain an elevation of 0 and require fixing:</p>
           <b-table striped hover sticky-header 
@@ -53,7 +53,7 @@
 
           </b-table>
 
-        </div>
+        </div> -->
 
         <!-- Modals -->
         <h4>Events</h4>
@@ -453,9 +453,8 @@ export default {
           let distance = item.distance
           let elevation_gain = item.elevation_gain
           let elevation_change = item.elevation_change
-          let headers = ['start_date', 'athlete_name', 'athlete_email', 'activity_name', 'activity_type',
-            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
-            'net_elevation_change_ft']
+          let headers = ['start_date', 'athlete_name', 'athlete_email', 'athlete_email_consent', 'activity_name', 'activity_type',
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds']
           // if (wcr_event) {
           //   headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
           //   'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
@@ -490,8 +489,8 @@ export default {
             if (Object.keys(r).indexOf('start_date') > -1) {
                 start_date = r['start_date']
             }
-            tmp_csv.push([start_date, r['athlete_name'], r['athlete_email'], activity_name, r['activity_type'],
-                r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], r['net_elevation_change']])
+            tmp_csv.push([start_date, r['athlete_name'], r['athlete_email'], r['athlete_email_consent'], activity_name, r['activity_type'],
+                r['distance'], r['moving_time'], r['elapsed_time']])
             // if (wcr_event) {
             //   // Adjust time to match WCR stage
             //   let adj_obj = API.calculateAdjustedWCRTime(parseInt(r['wcr_stage']), parseFloat(r['distance']), 
