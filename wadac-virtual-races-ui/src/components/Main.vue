@@ -3,7 +3,7 @@
     <h1>Winchester PPP Results Submission</h1>
     <div class="content">
 <!--       <p class="results-link" @click="$router.push('/results')">Provisional Results</p>
- -->      <div v-if="!refreshing">
+ -->  <div v-if="!refreshing">
         <p class="welcome" v-if="!cookie.access_token && !manual_submission_submitted && !loading">Hi there. Welcome to the Pedal, Paddle, Pace (PPP) virtual racing results submission tool. Please sign in with Strava using the button below.</p>
 
         <div v-if="!manual_submission_submitted && !loading" class="submission-container">
