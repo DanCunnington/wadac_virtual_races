@@ -24,6 +24,21 @@
               <p class="event_dates">{{event_date_str}}</p>
             </div>
           </div>
+          <div class="form-group row" v-if="selected_event != null">
+            <label for="checkbox-1" class="col-sm-3 col-form-label">Followed Set Course?</label>
+            <div class="col-sm-9">
+              <b-form-checkbox
+                id="checkbox-1"
+                v-model="followed_set_course"
+                name="checkbox-1"
+                value="yes"
+                unchecked-value="no"
+                switch
+                size="lg"
+              > 
+              </b-form-checkbox>
+            </div>
+          </div>
           <div v-if="selected_event != null">
             <div v-if="selected_event_wcr">
               <div class="form-group row">
@@ -97,6 +112,7 @@ export default {
       selected_activity: null,
       selected_team: null,
       selected_stage: null,
+      followed_set_course: "no",
       events: [{ value: null, text: 'Please select an event', disabled: true }],
       activities: [],
       full_activities: [],
@@ -238,7 +254,8 @@ export default {
         "moving_time": selected_acc.moving_time,
         "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281).toString(),
         "distance": (selected_acc.distance / 1609).toFixed(2),
-        "wcr": false
+        "wcr": false,
+        "followed_set_course": this.followed_set_course
       }
       // Add team and stage in for WCR
       if (this.selected_event_wcr) {
@@ -298,6 +315,12 @@ export default {
 
   .submit-row {
     margin: 0 auto;
+  }
+
+  .custom-switch {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .activity-container {

@@ -175,17 +175,23 @@ export default {
         return {adj_time, ref_distance, ref_elevation_gain, hms_str}
     },
     calculateAdjustedTime(ref_distance, ref_elevation_gain, ref_elevation_change, recorded_distance, recorded_time, 
-        recorded_elevation_gain, recorded_elev_change) {
-        let dist_factor = recorded_distance / ref_distance
-        let adj_distance = recorded_time / dist_factor
-        let average_pace = recorded_time / recorded_distance
-        let total_climb = recorded_elevation_gain + recorded_elev_change
-        let scaled_climb = total_climb / dist_factor
-        let excess_elev_change = scaled_climb - (ref_elevation_change + ref_elevation_gain)
-        let elev_change_per_mile = (7 / 100) * (excess_elev_change / recorded_distance)
-        let new_avg_pace = average_pace * (1 - (elev_change_per_mile / 100))
+        recorded_elevation_gain, recorded_elev_change, followed_set_course) {
 
-        let adj_time = parseInt(new_avg_pace * ref_distance)
+        let adj_time = 0
+        if (followed_set_course === "yes") {
+            adj_time = recorded_time
+        } else {
+            let dist_factor = recorded_distance / ref_distance
+            let adj_distance = recorded_time / dist_factor
+            let average_pace = recorded_time / recorded_distance
+            let total_climb = recorded_elevation_gain + recorded_elev_change
+            let scaled_climb = total_climb / dist_factor
+            let excess_elev_change = scaled_climb - (ref_elevation_change + ref_elevation_gain)
+            let elev_change_per_mile = (7 / 100) * (excess_elev_change / recorded_distance)
+            let new_avg_pace = average_pace * (1 - (elev_change_per_mile / 100))
+
+            adj_time = parseInt(new_avg_pace * ref_distance)
+        }
 
         let h = parseInt(adj_time / 3600).toString()
         let m = parseInt((adj_time % 3600)/60).toString()
@@ -231,7 +237,7 @@ export default {
             return false
         } else {
             return this.calculateAdjustedTime(ref_distance, ref_elevation_gain, ref_change, recorded_distance, 
-                recorded_time, recorded_elevation_gain, recorded_elev_change)
+                recorded_time, recorded_elevation_gain, recorded_elev_change, "no")
         }
     }
 }

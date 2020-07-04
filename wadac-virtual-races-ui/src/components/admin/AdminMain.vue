@@ -452,6 +452,7 @@ export default {
           let distance = item.distance
           let elevation_gain = item.elevation_gain
           let elevation_change = item.elevation_change
+          
           let headers = []
           if (wcr_event) {
             headers = ['start_date', 'team', 'stage', 'athlete_name', 'activity_name', 
@@ -464,7 +465,7 @@ export default {
             headers = ['start_date', 'athlete_name', 'activity_name', 
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
             'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
-            'adjusted_time_seconds', 'adjusted_time_hms'
+            'followed_set_course','adjusted_time_seconds', 'adjusted_time_hms'
             ]
           } else if (distance && elevation_gain) {
             headers = ['start_date', 'athlete_name', 'activity_name', 
@@ -502,18 +503,24 @@ export default {
                 r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
 
             } else if (distance && elevation_gain && elevation_change) {
+
+              let followed_set_course = r['followed_set_course']
+              if (!followed_set_course || followed_set_course == undefined) {
+                followed_set_course = "no"
+              }
+
               // Adjust time to match event
               let adj_obj = API.calculateAdjustedTime(parseFloat(distance), parseFloat(elevation_gain), parseFloat(elevation_change),
-               parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
+               parseFloat(r['distance']), parseFloat(r['moving_time']), parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']), followed_set_course)
               let adj_time = adj_obj['adj_time']
               let ref_dist = adj_obj['ref_distance']
               let ref_elev = adj_obj['ref_elevation_gain']
               let ref_elev_change = adj_obj['ref_elevation_change']
-              let hms = adj_obj['hms_str']
+              let hms = adj_obj['hms_str']              
 
               tmp_csv.push([start_date, r['athlete_name'], activity_name, r['distance'], 
                 r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
-                r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
+                r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, followed_set_course, adj_time, hms])
             } else if (distance && elevation_gain) {
               // Adjust time to match event
               let adj_obj = API.calculateAdjustedTimeOLD(parseFloat(distance), parseFloat(elevation_gain),

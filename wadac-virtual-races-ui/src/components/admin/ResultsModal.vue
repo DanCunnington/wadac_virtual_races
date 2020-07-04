@@ -59,6 +59,7 @@ export default {
       if (this.ref_elevation_change) {
         this.fields.push({"key": "ref_elevation_change", "label": "Event Reference Elevation Change (ft)", "sortable": false})
       }
+      this.fields.push({"key": "followed_set_course", "label": "Followed Set Course?", "sortable": false})
 
       if ((this.ref_distance && this.ref_elevation_gain) || this.ref_elevation_change) {
         this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false})
@@ -68,9 +69,14 @@ export default {
       if (this.ref_distance && this.ref_elevation_gain && this.ref_elevation_change) {
         // Adjust time to match event
         this.preview_results_set.forEach(r => {
+          let followed_set_course = r['followed_set_course']
+          if (!followed_set_course || followed_set_course == undefined) {
+            followed_set_course = "no"
+          }
+
           let adj_obj = API.calculateAdjustedTime(parseFloat(this.ref_distance), parseFloat(this.ref_elevation_gain),
             parseFloat(this.ref_elevation_change), parseFloat(r['distance']), parseFloat(r['moving_time']), 
-            parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']))
+            parseFloat(r['elevation_gain']), parseFloat(r['net_elevation_change']), followed_set_course)
           let adj_time = adj_obj['adj_time']
           let ref_dist = adj_obj['ref_distance']
           let ref_elev = adj_obj['ref_elevation_gain']

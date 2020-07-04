@@ -15,17 +15,18 @@ module.exports = (app, db, strava) => {
 		let elevation_gain = new_result.elevation_gain
 		let distance = new_result.distance
 		let manual_elevation_change = new_result.manual_elevation_change
+		let followed_set_course = new_result.followed_set_course
 
 		// WCR
 		let wcr = new_result.wcr
 		let team = new_result.wcr_team
 		let stage = new_result.wcr_stage
 
-		if (!event_id || !activity_name || !activity_id || !start_date || !athlete_name || 
+		if (!event_id || !activity_name || !activity_id || !followed_set_course || !start_date || !athlete_name || 
 			!elapsed_time || !moving_time || ! elevation_gain || !distance) {
 			res.status(400)
 			return res.json({"err": "please specify event_id, athlete_name, activity_id, "+
-				"activity_name, start_date, elapsed_time, moving_time, elevation_gain and distance"})
+				"activity_name, followed_set_course, start_date, elapsed_time, moving_time, elevation_gain and distance"})
 		}
 
 		if (wcr && (!team || !stage)) {
@@ -70,7 +71,7 @@ module.exports = (app, db, strava) => {
 		let insertResultToDb = function(net_elevation_change) {
 			// Insert to database			
 			let result = {event_id, athlete_name, activity_id, activity_name, start_date, 
-				elapsed_time, moving_time, elevation_gain, distance}
+				elapsed_time, moving_time, elevation_gain, distance, followed_set_course}
 
 			if (net_elevation_change) {
 				result.net_elevation_change = net_elevation_change

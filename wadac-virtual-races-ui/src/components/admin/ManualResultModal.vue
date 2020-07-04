@@ -20,6 +20,21 @@
             <p class="event_dates">{{event_date_str}}</p>
           </div>
         </div>
+        <div class="form-group row" v-if="selected_event != null">
+            <label for="checkbox-1" class="col-sm-4 col-form-label">Followed Set Course?</label>
+            <div class="col-sm-8">
+              <b-form-checkbox
+                id="checkbox-1"
+                v-model="followed_set_course"
+                name="checkbox-1"
+                value="yes"
+                unchecked-value="no"
+                switch
+                size="lg"
+              > 
+              </b-form-checkbox>
+            </div>
+          </div>
 
         <div v-if="selected_event != null">
           <div v-if="selected_event_wcr">
@@ -140,7 +155,8 @@ export default {
       distance_state: null,
       eg_state: null,
       ec_state: null,
-      events_fn: null
+      events_fn: null,
+      followed_set_course: "no"
     }
   },
   mounted() {
@@ -337,7 +353,8 @@ export default {
           "elevation_gain": this.elevation_gain,
           "manual_elevation_change": this.elevation_change,
           "distance": this.distance,
-          "wcr": false
+          "wcr": false,
+          "followed_set_course": this.followed_set_course
         }
         console.log(new_result)
         // Add team and stage in for WCR
@@ -422,6 +439,12 @@ export default {
     margin-bottom: 0;
     line-height: 40px;
     font-size: smaller;
+  }
+
+  .custom-switch {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
   }
 </style>
 
