@@ -27,7 +27,7 @@
           <div class="form-group row" v-if="selected_event != null">
             <label for="checkbox-1" class="col-sm-3 col-form-label">Followed Set Course?</label>
             <div class="col-sm-9">
-              <b-form-checkbox
+              <!-- <b-form-checkbox
                 id="checkbox-1"
                 v-model="followed_set_course"
                 name="checkbox-1"
@@ -36,7 +36,13 @@
                 switch
                 size="lg"
               > 
-              </b-form-checkbox>
+              </b-form-checkbox> -->
+              <b-form-radio-group
+                v-model="followed_set_course"
+                :options="fsc_options"
+                name="radio-inline"
+                required
+              ></b-form-radio-group>
             </div>
           </div>
           <div v-if="selected_event != null">
@@ -112,7 +118,8 @@ export default {
       selected_activity: null,
       selected_team: null,
       selected_stage: null,
-      followed_set_course: "no",
+      followed_set_course: "",
+      fsc_options: ['Yes', 'No'],
       events: [{ value: null, text: 'Please select an event', disabled: true }],
       activities: [],
       full_activities: [],
@@ -255,7 +262,7 @@ export default {
         "elevation_gain": parseInt(selected_acc.total_elevation_gain * 3.281).toString(),
         "distance": (selected_acc.distance / 1609).toFixed(2),
         "wcr": false,
-        "followed_set_course": this.followed_set_course
+        "followed_set_course": this.followed_set_course.toLowerCase()
       }
       // Add team and stage in for WCR
       if (this.selected_event_wcr) {
@@ -317,7 +324,7 @@ export default {
     margin: 0 auto;
   }
 
-  .custom-switch {
+  .bv-no-focus-ring {
     position: relative;
     top: 50%;
     transform: translateY(-50%);
