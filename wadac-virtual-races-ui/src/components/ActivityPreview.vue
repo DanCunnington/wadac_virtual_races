@@ -46,7 +46,7 @@ export default {
       },
       attribution:'',
       map: null,
-      strava_map_url: 'https://b.tiles.mapbox.com/v4/strava.blprdx6r/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1Ijoic3RyYXZhIiwiYSI6IlpoeXU2U0UifQ.c7yhlZevNRFCqHYm6G6Cyg',
+      strava_map_url: 'https://a.tiles.mapbox.com/styles/v1/strava/ck2gt6oil0c7y1cnvlz1uphnu/tiles/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic3RyYXZhIiwiYSI6IlpoeXU2U0UifQ.c7yhlZevNRFCqHYm6G6Cyg',
       distance_miles: 0,
       elevation_gain: 0,
       time_str: '',

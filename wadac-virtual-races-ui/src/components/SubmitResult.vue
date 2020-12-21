@@ -24,19 +24,9 @@
               <p class="event_dates">{{event_date_str}}</p>
             </div>
           </div>
-          <div class="form-group row" v-if="selected_event != null">
+          <div class="form-group row" v-if="selected_event != null && !selected_event_duathlon">
             <label for="checkbox-1" class="col-sm-3 col-form-label">Followed Set Course?</label>
             <div class="col-sm-9">
-              <!-- <b-form-checkbox
-                id="checkbox-1"
-                v-model="followed_set_course"
-                name="checkbox-1"
-                value="yes"
-                unchecked-value="no"
-                switch
-                size="lg"
-              > 
-              </b-form-checkbox> -->
               <b-form-radio-group
                 v-model="followed_set_course"
                 :options="fsc_options"
@@ -115,10 +105,11 @@ export default {
     return {
       selected_event: null,
       selected_event_wcr: false,
+      selected_event_duathlon: false,
       selected_activity: null,
       selected_team: null,
       selected_stage: null,
-      followed_set_course: "",
+      followed_set_course: "n/a",
       fsc_options: ['Yes', 'No'],
       events: [{ value: null, text: 'Please select an event', disabled: true }],
       activities: [],
@@ -145,6 +136,12 @@ export default {
         this.selected_event_wcr = e.wcr_event
       } else {
         this.selected_event_wcr = false
+      }
+
+      if (Object.keys(e).indexOf('duathlon_event') > -1) {
+        this.selected_event_duathlon = e.duathlon_event
+      } else {
+        this.selected_event_duathlon = false
       }
       
       let start = new Date(e.start_time)
@@ -196,8 +193,10 @@ export default {
           } else {            
             let full_activities = []
             let backup_activities = []
+            let accepted_activities = ['Run', 'Ride']
+
             response.data.forEach((ac, idx) => {
-              if (ac.type == 'Run') {
+              if (accepted_activities.indexOf(ac.type) > -1) {
                 full_activities.push(ac)
                 backup_activities.push(ac)
                 let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
@@ -218,18 +217,28 @@ export default {
       let new_activities = []
       let new_full_activities = []
       this.backup_activities.forEach((ac, idx) => {
-        let date_split = ac.start_date_local.split('T')
-        let date = date_split[0].split('-')
-        let time = date_split[1].split('Z')[0]
-        let time_split = time.split(':')
-        let date_obj = new Date(date[0], parseInt(date[1])-1, date[2], time_split[0], time_split[1], time_split[2])
-        let activity_js_time = date_obj.getTime()
-        if (activity_js_time >= start_time && activity_js_time < end_time) {
-          new_full_activities.push(ac)
-          let idx = new_full_activities.length -1
-          let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
-          new_activities.push({"value": idx, "html": html_str})
+        // Filter for duathlon first, then by date time
+        let include_rides = this.selected_event_duathlon
+        let include_ac_type = true
+        if (!include_rides && ac.type == 'Ride') {
+          include_ac_type = false
         }
+          
+          let date_split = ac.start_date_local.split('T')
+          let date = date_split[0].split('-')
+          let time = date_split[1].split('Z')[0]
+          let time_split = time.split(':')
+          let date_obj = new Date(date[0], parseInt(date[1])-1, date[2], time_split[0], time_split[1], time_split[2])
+          let activity_js_time = date_obj.getTime()
+
+
+          if (activity_js_time >= start_time && activity_js_time < end_time && include_ac_type) {
+            new_full_activities.push(ac)
+            let idx = new_full_activities.length -1
+            let html_str = '<ActivityPreview :activity="full_activities[idx]"></ActivityPreview>'
+            new_activities.push({"value": idx, "html": html_str})
+          }
+        
       })
       this.activities = new_activities
       this.full_activities = new_full_activities
@@ -254,6 +263,7 @@ export default {
       let new_result = {
         "event_id": selected_event._id,
         "athlete_name": this.cookie.user_name,
+        "activity_type": selected_acc.type,
         "activity_id": selected_acc.id,
         "activity_name": selected_acc.name,
         "start_date": selected_acc.start_date_local,
@@ -284,8 +294,8 @@ export default {
           }
         }, err => {
           this.submit_disabled = false
-          if (Object.keys(err).indexOf('response') > -1 && err.response) {
-            let msg = err.response.data
+          if (Object.keys(err).indexOf('err') > -1 && err.err) {
+            let msg = err
             if (Object.keys(msg).indexOf('err') > -1) {
               if (msg.err == 'result already inserted') {
                 this.handleDuplicateSubmitError()

@@ -70,9 +70,16 @@ export default {
             Vue.prototype.$http.post(server_url+'/submit_result', obj).then(response => {
                 return resolve(response)
             }, err => {
-                // If access token is invalid, deauthorise
                 console.log(err)
-                this.clearCookie()
+                if (Object.keys(err).indexOf('response') > -1 && 
+                    Object.keys(err.response).indexOf('data') > -1 &&
+                    Object.keys(err.response.data).indexOf('err') > -1 &&
+                    err.response.data.err == "result already inserted") {
+                    return reject(err.response.data)
+                } else {
+                    // If access token is invalid, deauthorise
+                    this.clearCookie()
+                }
             })  
         })
     },

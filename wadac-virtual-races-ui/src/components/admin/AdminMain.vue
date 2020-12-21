@@ -84,6 +84,7 @@
         
         <b-modal id="results-modal" class="results-modal" size="full" :title="modal_results_title">
           <ResultsModal ref="results_modal" :wcr="modal_results_wcr" 
+          :duathlon="modal_results_duathlon"
           :ref_distance="selected_ev_ref_distance" 
           :ref_elevation_gain="selected_ev_ref_elev_gain"
           :ref_elevation_change="selected_ev_ref_elev_change"
@@ -175,6 +176,7 @@ export default {
       preview_results_set: [],
       modal_results_title: '',
       modal_results_wcr: false,
+      modal_results_duathlon: false,
       selected_ev_ref_distance: false,
       selected_ev_ref_elev_gain: false,
       selected_ev_ref_elev_change: false,
@@ -333,6 +335,12 @@ export default {
         wcr_event = e.wcr_event
       }
 
+      let duathlon_event = false
+
+      if (Object.keys(e).indexOf('duathlon_event') > -1) {
+        duathlon_event = e.duathlon_event
+      }
+
       this.events.push({
         "name": name_display, 
         "start_date": start_display, 
@@ -342,6 +350,7 @@ export default {
         "results": '',
         "controls": "",
         "wcr_event": wcr_event,
+        "duathlon_event": duathlon_event,
         "distance": e.distance,
         "elevation_gain": e.elevation_gain,
         "elevation_change": e.elevation_change,
@@ -368,6 +377,7 @@ export default {
         ev_end_date: re_format_e,
         ev_id: e.id,
         ev_wcr: e.wcr_event,
+        ev_duathlon: e.duathlon_event,
         ev_distance: e.distance,
         ev_elevation_gain: e.elevation_gain,
         ev_elevation_change: e.elevation_change
@@ -433,6 +443,7 @@ export default {
           let name = item.name.charAt(0).toUpperCase() + item.name.slice(1);
           this.modal_results_title = `${name} Results Preview`
           this.modal_results_wcr = item.wcr_event
+          this.modal_results_duathlon = item.duathlon_event
           this.selected_ev_ref_distance = item.distance
           this.selected_ev_ref_elev_gain = item.elevation_gain
           this.selected_ev_ref_elev_change = item.elevation_change
@@ -449,6 +460,7 @@ export default {
         } else {
           console.log(response.data)
           let wcr_event = item.wcr_event
+          let duathlon_event = item.duathlon_event
           let distance = item.distance
           let elevation_gain = item.elevation_gain
           let elevation_change = item.elevation_change
@@ -459,6 +471,12 @@ export default {
             'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
             'net_elevation_change_ft', 'ref_distance', 'ref_elevation_gain', 'ref_elevation_change',
             'adjusted_time_seconds', 'adjusted_time_hms'
+            ]
+
+          } else if (duathlon_event) {
+            headers = ['start_date', 'athlete_name', 'activity_name', 'activity_type', 
+            'distance_miles', 'moving_time_seconds', 'elapsed_time_seconds', 'elevation_gain_ft',
+            'net_elevation_change_ft'
             ]
 
           } else if (distance && elevation_gain && elevation_change) {
@@ -501,6 +519,15 @@ export default {
               tmp_csv.push([start_date, r['wcr_team'], r['wcr_stage'], r['athlete_name'], 
                 activity_name, r['distance'], r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
                 r['net_elevation_change'], ref_dist, ref_elev, ref_elev_change, adj_time, hms])
+
+            } else if (duathlon_event) {
+              let activity_type = r['activity_type']
+              if (!activity_type || activity_type == undefined) {
+                activity_type = "Run"
+              }
+              tmp_csv.push([start_date, r['athlete_name'], activity_name, activity_type, r['distance'], 
+                r['moving_time'], r['elapsed_time'], r['elevation_gain'], 
+                r['net_elevation_change']])
 
             } else if (distance && elevation_gain && elevation_change) {
 

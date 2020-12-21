@@ -32,7 +32,19 @@
               ></b-form-checkbox>
             </div>
         </div>
-        <div v-if="!wcr_event">
+        <div class="form-group row">
+            <label for="duathlon-check" class="col-sm-5 col-form-label">Duathlon Event?</label>
+            <div class="col-sm-4 duathlon-switch">
+              <b-form-checkbox
+                id="duathlon-check"
+                v-model="duathlon_event"
+                name="duathlon-check"
+                switch
+                size="lg"
+              ></b-form-checkbox>
+            </div>
+        </div>
+        <div v-if="!wcr_event && !duathlon_event">
           <div class="form-group row">
             <label for="distance" class="col-sm-6 col-form-label">Event Distance (mi)</label>
             <div class="col-sm-6">
@@ -79,6 +91,7 @@ export default {
       eg_state: null,
       ec_state: null,
       wcr_event: false,
+      duathlon_event: false,
       notification: ''
     }
   },
@@ -125,6 +138,7 @@ export default {
         this.ev_start_date = this.existing.ev_start_date
         this.ev_end_date = this.existing.ev_end_date
         this.wcr_event = this.existing.ev_wcr
+        this.duathlon_event = this.existing.ev_duathlon
         this.ev_distance = this.existing.ev_distance
         this.ev_elevation_gain = this.existing.ev_elevation_gain
         this.ev_elevation_change = this.existing.ev_elevation_change
@@ -171,7 +185,7 @@ export default {
           return reject()
         }
 
-        if (!this.wcr_event) {
+        if (!this.wcr_event && !this.duathlon_event) {
           if (!this.ev_distance) {
             this.notification = 'Please enter an event distance in miles'
             this.distance_state = false
@@ -204,10 +218,11 @@ export default {
             "name": this.ev_name,
             "start_time": start_date,
             "end_time": end_date,
-            "wcr_event": this.wcr_event
+            "wcr_event": this.wcr_event,
+            "duathlon_event": this.duathlon_event
         }
 
-        if (!this.wcr_event) {
+        if (!this.wcr_event && !this.duathlon_event) {
           new_event.distance = this.ev_distance
           new_event.elevation_gain = this.ev_elevation_gain
           new_event.elevation_change = this.ev_elevation_change
@@ -292,7 +307,7 @@ export default {
     cursor: pointer
   }
 
-  .wcr-switch {
+  .wcr-switch, .duathlon-switch {
     margin-top: 4px;
   }
 
