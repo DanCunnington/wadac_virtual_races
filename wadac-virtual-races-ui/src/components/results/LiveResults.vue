@@ -138,7 +138,6 @@ export default {
             {"key": "athlete_name", "sortable": false}
           ]
           if (this.duathlon) {
-            console.log('duathlon')
             this.fields.push({"key": "adjusted_time", "label": "Adjusted Time (s)", "sortable": false, "thClass": 'd-none', "tdClass": 'd-none'})
             this.fields.push({"key": "hms", "label": "Adjusted Time", "sortable": false})
             this.preview_results_set.forEach((r, idx) => {
