@@ -20,6 +20,12 @@
             <p class="event_dates">{{event_date_str}}</p>
           </div>
         </div>
+        <div class="form-group row" v-if="selected_event != null && selected_event_duathlon">
+          <label for="event" class="col-sm-4 col-form-label">Activity Type</label>
+          <div class="col-sm-8">
+            <b-form-select v-model="activity_type" :options="activity_types" required></b-form-select>
+          </div>
+        </div>
         <div class="form-group row" v-if="selected_event != null">
             <label for="checkbox-1" class="col-sm-4 col-form-label">Followed Set Course?</label>
             <div class="col-sm-8">
@@ -156,7 +162,10 @@ export default {
       eg_state: null,
       ec_state: null,
       events_fn: null,
-      followed_set_course: "no"
+      followed_set_course: "no",
+      selected_event_duathlon: false,
+      activity_type: "Run",
+      activity_types: ["Run", "Ride"]
     }
   },
   mounted() {
@@ -176,7 +185,13 @@ export default {
       } else {
         this.selected_event_wcr = false
       }
-      
+
+      if (Object.keys(e).indexOf('duathlon_event') > -1) {
+        this.selected_event_duathlon = e.duathlon_event
+      } else {
+        this.selected_event_duathlon = false
+      }
+
       let start = new Date(e.start_time)
       let end = new Date(e.end_time)
       this.event_date_str = start.toDateString() + ' - ' + end.toDateString()
@@ -347,6 +362,7 @@ export default {
           "athlete_name": this.athlete_name,
           "activity_id": ac_name_id,
           "activity_name": ac_name_id,
+          "activity_type": this.activity_type,
           "start_date": current_date,
           "elapsed_time": elapsed_time,
           "moving_time": moving_time,
