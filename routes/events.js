@@ -49,6 +49,7 @@ module.exports = (app, db) => {
 		let end_time = req.body.end_time
 		let _id = req.body._id
 		let wcr_event = false
+		let duathlon_event = false
 		let distance = req.body.distance
 		let elevation_gain = req.body.elevation_gain
 		let elevation_change = req.body.elevation_change
@@ -57,19 +58,23 @@ module.exports = (app, db) => {
 			wcr_event = req.body.wcr_event
 		}
 
+		if (Object.keys(req.body).indexOf('duathlon_event') > -1) {
+			duathlon_event = req.body.duathlon_event
+		}
+
 		if (!_id || !event_name || !start_time || !end_time || end_time <= start_time) {
 			res.status(400)
 			return res.json({"err": "please specify id, event_name, start_time and end_time and ensure end_time is after start_time."})
 		}
 
-		if (!wcr_event && (!distance || !elevation_gain || !elevation_change)) {
+		if ((!wcr_event && !duathlon_event) && (!distance || !elevation_gain || !elevation_change)) {
 			res.status(400)
-			return res.json({"err": "please specify distance, elevation gain and elevation change for non welsh castles events."})
+			return res.json({"err": "please specify distance, elevation gain and elevation change for non welsh castles or duathlon events."})
 		}
 
 		// Insert to database
-		let event = {event_name, start_time, end_time, wcr_event}
-		if (!wcr_event) {
+		let event = {event_name, start_time, end_time, wcr_event, duathlon_event}
+		if (!wcr_event && !duathlon_event) {
 			event.distance = distance
 			event.elevation_gain = elevation_gain
 			event.elevation_change = elevation_change
